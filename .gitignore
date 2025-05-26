@@ -1,0 +1,43 @@
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# Sonarlint plugin
+.idea/**/sonarlint/
+.idea/**/sonarIssues.xml
+
+### Logs ###
+*.log
+
+### OS-specific ###
+.DS_Store
+Thumbs.db
+
+### Gradle ###
+.gradle/
+**/build/
+
+# Wrapper
+!gradle/wrapper/gradle-wrapper.jar
+
+### Java ###
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+replay_pid*
+
+### Secret configs ###
+/src/main/resources/application.properties
+/src/main/resources/application.yml
+
+# Allow template configs
+!/src/main/resources/application.properties.example
+!/src/main/resources/application.yml.example
