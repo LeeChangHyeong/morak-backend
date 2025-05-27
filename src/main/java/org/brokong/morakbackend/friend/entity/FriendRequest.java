@@ -1,11 +1,9 @@
 package org.brokong.morakbackend.friend.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import org.brokong.morakbackend.friend.enums.FriendRequestStatus;
 import org.brokong.morakbackend.global.BaseEntity;
+import org.brokong.morakbackend.user.entity.User;
 
 @Entity(name = "friend_requests")
 public class FriendRequest extends BaseEntity {
@@ -15,12 +13,15 @@ public class FriendRequest extends BaseEntity {
 	@Column(name = "friend_request_id")
 	private Long id;
 
-	@Column(nullable = false)
-	private Long senderId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "sender_id", nullable = false)
+	private User sender;
 
-	@Column(nullable = false)
-	private Long receiverId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "receiver_id", nullable = false)
+	private User receiver;
 
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private FriendRequestStatus friendRequeststatus;
 }

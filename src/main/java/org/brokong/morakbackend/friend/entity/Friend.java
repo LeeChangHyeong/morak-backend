@@ -1,10 +1,8 @@
 package org.brokong.morakbackend.friend.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import org.brokong.morakbackend.global.BaseEntity;
+import org.brokong.morakbackend.user.entity.User;
 
 @Entity(name = "friends")
 public class Friend extends BaseEntity {
@@ -14,9 +12,11 @@ public class Friend extends BaseEntity {
 	@Column(name = "friend_id")
 	private Long id;
 
-	@Column(nullable = false)
-	private Long senderId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "sender_id", nullable = false)
+	private User sender;
 
-	@Column(nullable = false)
-	private Long receiverId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "receiver_id", nullable = false)
+	private User receiver;
 }
