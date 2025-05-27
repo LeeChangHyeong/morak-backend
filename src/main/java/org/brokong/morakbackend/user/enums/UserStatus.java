@@ -1,4 +1,4 @@
 package org.brokong.morakbackend.user.enums;
 
-public enum Status {
+public enum UserStatus {
 }

@@ -4,7 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Column;
 import org.brokong.morakbackend.global.BaseEntity;
 import org.brokong.morakbackend.user.enums.LoginType;
-import org.brokong.morakbackend.user.enums.Status;
+import org.brokong.morakbackend.user.enums.UserStatus;
 
 @Entity(name = "users")
 public class User extends BaseEntity {
@@ -25,6 +25,6 @@ public class User extends BaseEntity {
 	private String pushToken;
 
 	@Column(nullable = false)
-	private Status status;
+	private UserStatus status;
 
 }
