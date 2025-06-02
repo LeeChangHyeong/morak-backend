@@ -48,4 +48,12 @@ public class AuthController {
 
 		return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
+
+	// 로그아웃
+	@PostMapping("/logout")
+	public ResponseEntity<ResponseDto<String>> logout() {
+		ResponseDto<String> response = new ResponseDto<>("로그아웃 성공", "로그아웃 되었습니다.");
+
+		return ResponseEntity.status(HttpStatus.OK).body(response);
+	}
 }
