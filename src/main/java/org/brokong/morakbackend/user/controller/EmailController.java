@@ -16,27 +16,27 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/email")
 public class EmailController {
 
-	// 이메일 중복 확인
-	@GetMapping("check-email")
-	public ResponseEntity<ResponseDto> checkEmail(@RequestParam String email) {
-		ResponseDto<UserResponseDto> response = new ResponseDto<>("회원가입 성공", new UserResponseDto());
+    // 이메일 중복 확인
+    @GetMapping("check-email")
+    public ResponseEntity<ResponseDto> checkEmail(@RequestParam String email) {
+        ResponseDto<UserResponseDto> response = new ResponseDto<>("회원가입 성공", new UserResponseDto());
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
-	}
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
-	// 이메일 인증번호 전송
-	@PostMapping("send-email")
-	public ResponseEntity<ResponseDto> sendEmail(@RequestParam String email) {
-		ResponseDto<UserResponseDto> response = new ResponseDto<>("이메일 인증번호 전송 성공", new UserResponseDto());
+    // 이메일 인증번호 전송
+    @PostMapping("send-email")
+    public ResponseEntity<ResponseDto> sendEmail(@RequestParam String email) {
+        ResponseDto<UserResponseDto> response = new ResponseDto<>("이메일 인증번호 전송 성공", new UserResponseDto());
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
-	}
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
-	// 이메일 인증번호 확인
-	@PostMapping("verify-email")
-	public ResponseEntity<ResponseDto> verifyEmail(@RequestBody EmailVerifyReqeustDto requestDto) {
-		ResponseDto<UserResponseDto> response = new ResponseDto<>("이메일 인증번호 확인 성공", new UserResponseDto());
+    // 이메일 인증번호 확인
+    @PostMapping("verify-email")
+    public ResponseEntity<ResponseDto> verifyEmail(@RequestBody EmailVerifyReqeustDto requestDto) {
+        ResponseDto<UserResponseDto> response = new ResponseDto<>("이메일 인증번호 확인 성공", new UserResponseDto());
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
-	}
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 }

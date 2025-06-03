@@ -15,45 +15,45 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-	// 회원가입
-	@PostMapping("/signup")
-	public ResponseEntity<ResponseDto<UserResponseDto>> signUp(@RequestBody SignupRequestDto request) {
+    // 회원가입
+    @PostMapping("/signup")
+    public ResponseEntity<ResponseDto<UserResponseDto>> signUp(@RequestBody SignupRequestDto request) {
 
-		ResponseDto<UserResponseDto> response = new ResponseDto<>("회원가입 성공", new UserResponseDto());
+        ResponseDto<UserResponseDto> response = new ResponseDto<>("회원가입 성공", new UserResponseDto());
 
-		return ResponseEntity.status(HttpStatus.CREATED).body(response);
-	}
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 
-	// 로그인
-	@PostMapping("/login")
-	public ResponseEntity<ResponseDto<UserResponseDto>> login(@RequestBody LoginRequestDto request) {
+    // 로그인
+    @PostMapping("/login")
+    public ResponseEntity<ResponseDto<UserResponseDto>> login(@RequestBody LoginRequestDto request) {
 
-		ResponseDto<UserResponseDto> response = new ResponseDto<>("로그인 성공", new UserResponseDto());
+        ResponseDto<UserResponseDto> response = new ResponseDto<>("로그인 성공", new UserResponseDto());
 
-		return ResponseEntity.status(HttpStatus.OK).body(response);
-	}
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
-	// 카카오 소셜 로그인
-	@PostMapping("/login/kakao")
-	public ResponseEntity<ResponseDto<UserResponseDto>> kakaoLogin() {
-		ResponseDto<UserResponseDto> response = new ResponseDto<>("카카오 로그인 성공", new UserResponseDto());
+    // 카카오 소셜 로그인
+    @PostMapping("/login/kakao")
+    public ResponseEntity<ResponseDto<UserResponseDto>> kakaoLogin() {
+        ResponseDto<UserResponseDto> response = new ResponseDto<>("카카오 로그인 성공", new UserResponseDto());
 
-		return ResponseEntity.status(HttpStatus.OK).body(response);
-	}
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
-	// 애플 소셜 로그인
-	@PostMapping("/login/apple")
-	public ResponseEntity<ResponseDto<UserResponseDto>> appleLogin() {
-		ResponseDto<UserResponseDto> response = new ResponseDto<>("애플 로그인 성공", new UserResponseDto());
+    // 애플 소셜 로그인
+    @PostMapping("/login/apple")
+    public ResponseEntity<ResponseDto<UserResponseDto>> appleLogin() {
+        ResponseDto<UserResponseDto> response = new ResponseDto<>("애플 로그인 성공", new UserResponseDto());
 
-		return ResponseEntity.status(HttpStatus.OK).body(response);
-	}
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 
-	// 로그아웃
-	@PostMapping("/logout")
-	public ResponseEntity<ResponseDto<String>> logout() {
-		ResponseDto<String> response = new ResponseDto<>("로그아웃 성공", "로그아웃 되었습니다.");
+    // 로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<ResponseDto<String>> logout() {
+        ResponseDto<String> response = new ResponseDto<>("로그아웃 성공", "로그아웃 되었습니다.");
 
-		return ResponseEntity.status(HttpStatus.OK).body(response);
-	}
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }

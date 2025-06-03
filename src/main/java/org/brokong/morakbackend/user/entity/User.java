@@ -13,29 +13,29 @@ import org.brokong.morakbackend.user.enums.UserStatus;
 @Entity(name = "users")
 public class User extends BaseEntity {
 
-	@Id
-	@GeneratedValue
-	@Column(name = "user_id")
-	private Long id;
+    @Id
+    @GeneratedValue
+    @Column(name = "user_id")
+    private Long id;
 
-	@Column(nullable = false)
-	private String email;
+    @Column(nullable = false)
+    private String email;
 
-	@Column(nullable = false)
-	private String password;
+    @Column(nullable = false)
+    private String password;
 
-	@Column(nullable = false)
-	private String nickname;
+    @Column(nullable = false)
+    private String nickname;
 
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private LoginType loginType;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private LoginType loginType;
 
-	@Column(nullable = false)
-	private String pushToken;
+    @Column(nullable = false)
+    private String pushToken;
 
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private UserStatus status;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserStatus status;
 
 }
