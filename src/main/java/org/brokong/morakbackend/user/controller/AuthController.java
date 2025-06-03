@@ -1,19 +1,21 @@
 package org.brokong.morakbackend.user.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.ResponseDto;
 import org.brokong.morakbackend.user.dto.request.LoginRequestDto;
 import org.brokong.morakbackend.user.dto.request.SignupRequestDto;
 import org.brokong.morakbackend.user.dto.response.UserResponseDto;
+import org.brokong.morakbackend.user.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("${api.prefix}/auth")
+@RequiredArgsConstructor
 public class AuthController {
+
+    private final AuthService authService;
 
     // 회원가입
     @PostMapping("/signup")
@@ -22,6 +24,15 @@ public class AuthController {
         ResponseDto<UserResponseDto> response = new ResponseDto<>("회원가입 성공", new UserResponseDto());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    // 닉네임 중복 확인
+    @GetMapping("/check-nickname")
+    public ResponseEntity<ResponseDto<String>> checkNickname(@RequestParam String nickname) {
+
+        authService.checkNickname(nickname);
+
+        return ResponseEntity.ok(new ResponseDto<>("사용 가능한 닉네임입니다.", null));
     }
 
     // 로그인
