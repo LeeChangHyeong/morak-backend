@@ -42,8 +42,9 @@ public class EmailController {
     // 이메일 인증번호 확인
     @PostMapping("verify-email")
     public ResponseEntity<ResponseDto> verifyEmail(@RequestBody EmailVerifyReqeustDto requestDto) {
-        ResponseDto<UserResponseDto> response = new ResponseDto<>("이메일 인증번호 확인 성공", new UserResponseDto());
+        emailService.verifyAuthCode(requestDto.getEmail(), requestDto.getCode());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(new ResponseDto<>("이메일 인증번호 확인 성공", null));
     }
 }
