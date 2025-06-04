@@ -17,7 +17,6 @@ public class EmailService {
 
     private final UserRepository userRepository;
     private final RedisService redisService;
-    // TODO: 이메일 전송 기능 구현 해야함
     private final JavaMailSender mailSender;
 
     // 이메일 중복 확인
@@ -44,12 +43,20 @@ public class EmailService {
         }
 
         // 성공 시 Redis 저장
-        redisService.setValues("email_auth:" + email, authCode, Duration.ofMinutes(3));
+        redisService.setValue("email_auth:" + email, authCode, Duration.ofMinutes(3));
     }
 
     // 이메일 코드 검증
-    public void verifyCode(String email, String authCode) {
+    public void verifyAuthCode(String email, String authCode) {
+        String key = "email_auth:" + email;
+        String savedAuthCode = redisService.getValue(key);
 
+        if(savedAuthCode == null || !savedAuthCode.equals(authCode)) {
+            throw new IllegalArgumentException("인증번호가 일치하지 않거나 만료되었습니다.");
+        }
+
+        // 인증 성공 시 Redis에서 삭제
+        redisService.deleteValue(key);
     }
 
     // 이메일 검증 코드 생성
