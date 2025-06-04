@@ -15,3 +15,14 @@
 
 # jwt 키
 # jwt.secret=
+
+# 이메일 발신자 정보
+# spring.mail.host=
+# spring.mail.port=
+# spring.mail.username=
+# spring.mail.password=
+
+# TLS 인증 설정
+# spring.mail.properties.mail.smtp.auth=
+# spring.mail.properties.mail.smtp.starttls.enable=
+# spring.mail.properties.mail.smtp.starttls.required=
