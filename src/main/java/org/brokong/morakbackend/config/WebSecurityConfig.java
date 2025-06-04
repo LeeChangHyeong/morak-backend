@@ -1,4 +1,4 @@
-package org.brokong.morakbackend.global.Config;
+package org.brokong.morakbackend.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

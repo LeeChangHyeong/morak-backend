@@ -1,4 +1,4 @@
-package org.brokong.morakbackend.global.Config;
+package org.brokong.morakbackend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
