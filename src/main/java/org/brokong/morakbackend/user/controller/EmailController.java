@@ -23,7 +23,7 @@ public class EmailController {
 
 
     // 이메일 중복 확인
-    @GetMapping("check-email")
+    @GetMapping("/check-email")
     public ResponseEntity<ResponseDto> checkEmail(@RequestParam String email) {
         ResponseDto<UserResponseDto> response = new ResponseDto<>("회원가입 성공", new UserResponseDto());
 
@@ -31,7 +31,7 @@ public class EmailController {
     }
 
     // 이메일 인증번호 전송
-    @PostMapping("send-email")
+    @PostMapping("/send-email")
     public ResponseEntity<ResponseDto<Void>> sendEmail(@RequestParam String email) {
         emailService.sendAuthCode(email);
 
@@ -40,7 +40,7 @@ public class EmailController {
     }
 
     // 이메일 인증번호 확인
-    @PostMapping("verify-email")
+    @PostMapping("/verify-email")
     public ResponseEntity<ResponseDto> verifyEmail(@RequestBody EmailVerifyReqeustDto requestDto) {
         emailService.verifyAuthCode(requestDto.getEmail(), requestDto.getCode());
 
