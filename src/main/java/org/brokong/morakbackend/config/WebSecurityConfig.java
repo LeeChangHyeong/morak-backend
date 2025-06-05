@@ -32,7 +32,8 @@ public class WebSecurityConfig {
                                 apiPrefix + "/auth/signup",
                                 apiPrefix + "/auth/login",
                                 apiPrefix + "/auth/login/**",
-                                apiPrefix + "/auth/logout"
+                                apiPrefix + "/auth/logout",
+                                apiPrefix + "/email/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
