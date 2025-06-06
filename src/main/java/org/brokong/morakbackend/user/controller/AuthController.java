@@ -21,44 +21,44 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<ResponseDto<UserResponseDto>> signUp(@RequestBody SignupRequestDto request) {
 
-        ResponseDto<UserResponseDto> response = new ResponseDto<>("회원가입 성공", new UserResponseDto());
+        UserResponseDto userResponseDto = authService.signUp(request.getEmail(), request.getPassword(), request.getNickname());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDto<>("회원가입 성공", userResponseDto));
     }
 
     // 닉네임 중복 확인
     @GetMapping("/check-nickname")
-    public ResponseEntity<ResponseDto<String>> checkNickname(@RequestParam String nickname) {
+    public ResponseEntity<ResponseDto<Boolean>> checkNickname(@RequestParam String nickname) {
 
-        authService.checkNickname(nickname);
+        boolean isAvailable = authService.checkNickname(nickname);
 
-        return ResponseEntity.ok(new ResponseDto<>("사용 가능한 닉네임입니다.", null));
+        return ResponseEntity.ok(new ResponseDto<>("닉네임 사용 가능 여부", isAvailable));
     }
 
     // 로그인
-    @PostMapping("/login")
-    public ResponseEntity<ResponseDto<UserResponseDto>> login(@RequestBody LoginRequestDto request) {
-
-        ResponseDto<UserResponseDto> response = new ResponseDto<>("로그인 성공", new UserResponseDto());
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
-
-    // 카카오 소셜 로그인
-    @PostMapping("/login/kakao")
-    public ResponseEntity<ResponseDto<UserResponseDto>> kakaoLogin() {
-        ResponseDto<UserResponseDto> response = new ResponseDto<>("카카오 로그인 성공", new UserResponseDto());
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
-
-    // 애플 소셜 로그인
-    @PostMapping("/login/apple")
-    public ResponseEntity<ResponseDto<UserResponseDto>> appleLogin() {
-        ResponseDto<UserResponseDto> response = new ResponseDto<>("애플 로그인 성공", new UserResponseDto());
-
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
+//    @PostMapping("/login")
+//    public ResponseEntity<ResponseDto<UserResponseDto>> login(@RequestBody LoginRequestDto request) {
+//
+//        ResponseDto<UserResponseDto> response = new ResponseDto<>("로그인 성공", new UserResponseDto());
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(response);
+//    }
+//
+//    // 카카오 소셜 로그인
+//    @PostMapping("/login/kakao")
+//    public ResponseEntity<ResponseDto<UserResponseDto>> kakaoLogin() {
+//        ResponseDto<UserResponseDto> response = new ResponseDto<>("로그인 성공", new UserResponseDto());
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(response);
+//    }
+//
+//    // 애플 소셜 로그인
+//    @PostMapping("/login/apple")
+//    public ResponseEntity<ResponseDto<UserResponseDto>> appleLogin() {
+//        ResponseDto<UserResponseDto> response = new ResponseDto<>("로그인 성공", new UserResponseDto());
+//
+//        return ResponseEntity.status(HttpStatus.OK).body(response);
+//    }
 
     // 로그아웃
     @PostMapping("/logout")
