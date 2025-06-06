@@ -6,10 +6,17 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.BaseEntity;
 import org.brokong.morakbackend.user.enums.LoginType;
 import org.brokong.morakbackend.user.enums.UserStatus;
 
+@Getter
+@NoArgsConstructor
+@RequiredArgsConstructor
 @Entity(name = "users")
 public class User extends BaseEntity {
 
@@ -37,5 +44,16 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserStatus status;
+
+
+    @Builder
+    public User(String email, String password, String nickname, LoginType loginType, String pushToken, UserStatus status) {
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.loginType = loginType;
+        this.pushToken = pushToken;
+        this.status = status;
+    }
 
 }
