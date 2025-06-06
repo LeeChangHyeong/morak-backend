@@ -20,10 +20,8 @@ public class EmailService {
     private final JavaMailSender mailSender;
 
     // 이메일 중복 확인
-    public void checkEmail(String email) {
-        if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
-        }
+    public boolean checkEmail(String email) {
+        return !userRepository.existsByEmail(email); // 중복이 없으면 true 반환
     }
 
     // 이메일 검증 코드 전송

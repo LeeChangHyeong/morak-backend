@@ -3,16 +3,10 @@ package org.brokong.morakbackend.user.controller;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.ResponseDto;
 import org.brokong.morakbackend.user.dto.request.EmailVerifyReqeustDto;
-import org.brokong.morakbackend.user.dto.response.UserResponseDto;
 import org.brokong.morakbackend.user.service.EmailService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,10 +17,10 @@ public class EmailController {
 
     // 이메일 중복 확인
     @GetMapping("/check-email")
-    public ResponseEntity<ResponseDto> checkEmail(@RequestParam String email) {
-        ResponseDto<UserResponseDto> response = new ResponseDto<>("회원가입 성공", new UserResponseDto());
+    public ResponseEntity<ResponseDto<Boolean>> checkEmail(@RequestParam String email) {
+        boolean isAvailable = emailService.checkEmail(email);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.ok(new ResponseDto<>("이메일 사용 가능 여부", isAvailable));
     }
 
     // 이메일 인증번호 전송
@@ -35,7 +29,7 @@ public class EmailController {
         emailService.sendAuthCode(email);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(new ResponseDto<>("이메일 인증번호 전송 성공", null));
+                .body(new ResponseDto<>("이메일 인증번호 전송 성공", null));
     }
 
     // 이메일 인증번호 확인
@@ -44,6 +38,6 @@ public class EmailController {
         emailService.verifyAuthCode(requestDto.getEmail(), requestDto.getCode());
 
         return ResponseEntity.status(HttpStatus.OK)
-            .body(new ResponseDto<>("이메일 인증번호 확인 성공", null));
+                .body(new ResponseDto<>("이메일 인증번호 확인 성공", null));
     }
 }
