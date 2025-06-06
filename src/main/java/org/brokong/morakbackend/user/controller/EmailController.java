@@ -21,7 +21,6 @@ public class EmailController {
 
     private final EmailService emailService;
 
-
     // 이메일 중복 확인
     @GetMapping("/check-email")
     public ResponseEntity<ResponseDto> checkEmail(@RequestParam String email) {

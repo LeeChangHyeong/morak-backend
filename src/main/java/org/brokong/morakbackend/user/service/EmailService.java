@@ -36,14 +36,21 @@ public class EmailService {
 
         try {
             mailSender.send(message);
+            log.info("[이메일 전송 성공] email: {}", email);
         } catch (Exception e) {
             log.error("[이메일 전송 실패] email: {}, message: {}", email, e.getMessage(), e);
 
             throw new IllegalStateException("이메일 전송에 실패했습니다. 나중에 다시 시도해주세요.");
         }
 
-        // 성공 시 Redis 저장
-        redisService.setValue("email_auth:" + email, authCode, Duration.ofMinutes(3));
+        // Redis 저장
+        try {
+            redisService.setValue("email_auth:" + email, authCode, Duration.ofMinutes(3));
+            log.info("[Redis 저장 성공] email: {}", email);
+        } catch (Exception e) {
+            log.error("[Redis 저장 실패] email: {}, error: {}", email, e.getMessage(), e);
+            throw new IllegalStateException("인증번호 저장에 실패했습니다. 관리자에게 문의해주세요.");
+        }
     }
 
     // 이메일 코드 검증
