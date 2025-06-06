@@ -1,9 +1,10 @@
 package org.brokong.morakbackend.user.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.brokong.morakbackend.global.JwtUtil;
-import org.brokong.morakbackend.global.service.RedisService;
+import org.brokong.morakbackend.global.jwt.JwtUtil;
+import org.brokong.morakbackend.global.redis.RedisService;
 import org.brokong.morakbackend.user.dto.response.UserResponseDto;
 import org.brokong.morakbackend.user.entity.User;
 import org.brokong.morakbackend.user.enums.LoginType;
@@ -74,5 +75,23 @@ public class AuthService {
         redisService.setValue("refresh_token:" + user.getEmail(), refreshToken, Duration.ofDays(14));
 
         return new UserResponseDto(user, accessToken, refreshToken);
+    }
+
+    public void logout(HttpServletRequest request) {
+        String accessToken = jwtUtil.extractAccessToken(request);
+
+        if (accessToken == null || !jwtUtil.validateAccessToken(accessToken)) {
+            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+        }
+
+        long expiration = jwtUtil.getAccessTokenExpireTime(accessToken);
+        String email = jwtUtil.getEmailFromAccessToken(accessToken);
+
+        try {
+            redisService.setValue("access_token_blacklist:" + accessToken, "logout", Duration.ofMillis(expiration));
+            redisService.deleteValue("refresh_token:" + email);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("로그아웃에 실패했습니다. 관리자에게 문의해주세요.");
+        }
     }
 }

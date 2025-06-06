@@ -1,10 +1,11 @@
-package org.brokong.morakbackend.global;
+package org.brokong.morakbackend.global.jwt;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -70,5 +71,28 @@ public class JwtUtil {
 
             return false;
         }
+    }
+
+    // 헤더에서 AccessToken 가져오기
+    public String extractAccessToken(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+
+        if(header != null && header.startsWith("Bearer ")) {
+            return header.substring(7);
+        }
+
+        return null;
+    }
+
+    // 토큰 남은 시간 계산
+    public long getAccessTokenExpireTime(String accessToken) {
+        Date expiration = Jwts.parserBuilder()
+                .setSigningKey(secretKey.getBytes())
+                .build()
+                .parseClaimsJws(accessToken)
+                .getBody()
+                .getExpiration();
+
+        return expiration.getTime() - System.currentTimeMillis();
     }
 }
