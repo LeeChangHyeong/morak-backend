@@ -36,13 +36,13 @@ public class AuthController {
     }
 
     // 로그인
-//    @PostMapping("/login")
-//    public ResponseEntity<ResponseDto<UserResponseDto>> login(@RequestBody LoginRequestDto request) {
-//
-//        ResponseDto<UserResponseDto> response = new ResponseDto<>("로그인 성공", new UserResponseDto());
-//
-//        return ResponseEntity.status(HttpStatus.OK).body(response);
-//    }
+    @PostMapping("/login")
+    public ResponseEntity<ResponseDto<UserResponseDto>> login(@RequestBody LoginRequestDto request) {
+
+        UserResponseDto userResponseDto = authService.login(request.getEmail(), request.getPassword());
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("로그인 성공", userResponseDto));
+    }
 //
 //    // 카카오 소셜 로그인
 //    @PostMapping("/login/kakao")
