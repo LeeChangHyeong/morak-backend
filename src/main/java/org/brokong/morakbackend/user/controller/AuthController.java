@@ -1,7 +1,8 @@
 package org.brokong.morakbackend.user.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.brokong.morakbackend.global.ResponseDto;
+import org.brokong.morakbackend.global.response.ResponseDto;
 import org.brokong.morakbackend.user.dto.request.LoginRequestDto;
 import org.brokong.morakbackend.user.dto.request.SignupRequestDto;
 import org.brokong.morakbackend.user.dto.response.UserResponseDto;
@@ -62,9 +63,9 @@ public class AuthController {
 
     // 로그아웃
     @PostMapping("/logout")
-    public ResponseEntity<ResponseDto<String>> logout() {
-        ResponseDto<String> response = new ResponseDto<>("로그아웃 성공", "로그아웃 되었습니다.");
+    public ResponseEntity<ResponseDto<String>> logout(HttpServletRequest request) {
+        authService.logout(request);
 
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("로그아웃 성공", null));
     }
 }

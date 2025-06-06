@@ -2,7 +2,7 @@ package org.brokong.morakbackend.friend.entity;
 
 import jakarta.persistence.*;
 import org.brokong.morakbackend.friend.enums.FriendRequestStatus;
-import org.brokong.morakbackend.global.BaseEntity;
+import org.brokong.morakbackend.global.entity.BaseEntity;
 import org.brokong.morakbackend.user.entity.User;
 
 @Entity(name = "friend_requests")

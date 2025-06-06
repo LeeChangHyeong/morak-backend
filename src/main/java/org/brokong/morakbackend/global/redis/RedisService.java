@@ -1,4 +1,4 @@
-package org.brokong.morakbackend.global.service;
+package org.brokong.morakbackend.global.redis;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;

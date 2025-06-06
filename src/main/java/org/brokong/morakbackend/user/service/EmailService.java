@@ -2,9 +2,10 @@ package org.brokong.morakbackend.user.service;
 
 import java.time.Duration;
 import java.util.Random;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.brokong.morakbackend.global.service.RedisService;
+import org.brokong.morakbackend.global.redis.RedisService;
 import org.brokong.morakbackend.user.repository.UserRepository;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -56,7 +57,7 @@ public class EmailService {
         String key = "email_auth:" + email;
         String savedAuthCode = redisService.getValue(key);
 
-        if(savedAuthCode == null || !savedAuthCode.equals(authCode)) {
+        if (savedAuthCode == null || !savedAuthCode.equals(authCode)) {
             throw new IllegalArgumentException("인증번호가 일치하지 않거나 만료되었습니다.");
         }
 

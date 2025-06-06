@@ -1,7 +1,7 @@
 package org.brokong.morakbackend.user.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.brokong.morakbackend.global.ResponseDto;
+import org.brokong.morakbackend.global.response.ResponseDto;
 import org.brokong.morakbackend.user.dto.request.EmailVerifyReqeustDto;
 import org.brokong.morakbackend.user.service.EmailService;
 import org.springframework.http.HttpStatus;
