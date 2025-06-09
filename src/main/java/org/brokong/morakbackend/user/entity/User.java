@@ -5,9 +5,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.brokong.morakbackend.global.entity.BaseEntity;
+import org.brokong.morakbackend.post.entity.Post;
 import org.brokong.morakbackend.user.enums.LoginType;
 import org.brokong.morakbackend.user.enums.UserRoles;
 import org.brokong.morakbackend.user.enums.UserStatus;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -27,6 +31,10 @@ public class User extends BaseEntity {
 
     @Column(nullable = false)
     private String nickname;
+
+    // 읽기 전용
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -53,6 +61,12 @@ public class User extends BaseEntity {
         this.pushToken = pushToken;
         this.status = status;
         this.role = role;
+    }
+
+
+    public void addPost(Post post) {
+        posts.add(post);
+        post.setUser(this);
     }
 
 }
