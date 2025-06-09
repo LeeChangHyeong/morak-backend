@@ -4,6 +4,7 @@ import org.brokong.morakbackend.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,4 +18,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // 이메일 중복 확인
     boolean existsByEmail(String email);
+
+    List<User> findByNicknameContaining(String nickname);
+
+    Optional<User> findByNickname(String nickname);
 }

@@ -1,21 +1,57 @@
 package org.brokong.morakbackend.user.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.response.ResponseDto;
+import org.brokong.morakbackend.user.dto.response.UserResponseDto;
+import org.brokong.morakbackend.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("${api.prefix}/users")
 public class UserController {
 
-    // 단일 유저 조회
-//    @GetMapping("/{userId}")
-//    public ResponseEntity<ResponseDto<UserResponseDto>> getUser(@PathVariable Long userId) {
-//
-//        ResponseDto<UserResponseDto> response = new ResponseDto<>("단일 사용자 조회 성공", new UserResponseDto());
-//        return ResponseEntity.status(HttpStatus.OK).body(response);
-//    }
+    private final UserService userService;
+
+    @GetMapping("/me")
+    public ResponseEntity<ResponseDto<UserResponseDto>> getMyInfo() {
+        UserResponseDto myInfo = userService.getMyInfo();
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("본인 정보 조회 성공", myInfo));
+    }
+
+    // 단일 유저 조회 by Id
+    @GetMapping("/{userId}")
+    public ResponseEntity<ResponseDto<UserResponseDto>> getUserById(@PathVariable Long userId) {
+        UserResponseDto user = userService.getUserById(userId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("유저 정보 조회 성공", user));
+    }
+
+    // 단일 유저 조회 by nickname
+    @GetMapping("/nickname/{nickname}")
+    public ResponseEntity<ResponseDto<UserResponseDto>> getUserByNickname(@PathVariable String nickname) {
+        UserResponseDto user = userService.getUserByNickname(nickname);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("유저 정보 조회 성공", user));
+    }
+
+    // 유저 검색
+    @GetMapping("/search")
+    public ResponseEntity<ResponseDto<List<UserResponseDto>>> searchUsersByNickname(@RequestParam String nickname) {
+
+        List<UserResponseDto> users = userService.searchUsersByNickname(nickname);
+
+        if (users.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("닉네임에 해당하는 유저가 없습니다.", users));
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("유저 검색 성공", users));
+    }
 
     // 다중 유저 조회
 //    @GetMapping("/batch")
@@ -26,6 +62,7 @@ public class UserController {
 //    }
 
     // 전체 유저 조회
+    // 관리자 페이지
 //    @GetMapping
 //    public ResponseEntity<ResponseDto<List<UserResponseDto>>> getAllUsers() {
 //        ResponseDto<List<UserResponseDto>> response = new ResponseDto<>("전체 사용자 조회 성공", List.of(new UserResponseDto()));
