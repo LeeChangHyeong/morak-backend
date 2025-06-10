@@ -35,7 +35,7 @@ public class AuthService {
                 .email(email)
                 .password(encodedPassword)
                 .nickname(nickname)
-                .pushToken("aa")
+                .pushToken("test")
                 .loginType(LoginType.LOCAL)
                 .status(UserStatus.ACTIVE)
                 .role(UserRoles.USER)
