@@ -61,4 +61,20 @@ public class UserService {
             .map(UserResponseDto::new)
             .toList();
 	}
+
+	public void blockUserById(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        user.block();
+        userRepository.save(user);
+	}
+
+    public void withdrawal() {
+        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+        user.withdraw();
+
+        userRepository.save(user);
+    }
 }

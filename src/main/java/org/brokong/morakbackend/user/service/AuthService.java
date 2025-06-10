@@ -35,7 +35,7 @@ public class AuthService {
                 .email(email)
                 .password(encodedPassword)
                 .nickname(nickname)
-                .pushToken("aa")
+                .pushToken("test")
                 .loginType(LoginType.LOCAL)
                 .status(UserStatus.ACTIVE)
                 .role(UserRoles.USER)
@@ -63,6 +63,10 @@ public class AuthService {
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        if (user.getStatus() == UserStatus.BLOCKED) {
+            throw new IllegalArgumentException("차단된 계정입니다.\n관리자에게 문의해주세요.");
         }
 
         // JWT

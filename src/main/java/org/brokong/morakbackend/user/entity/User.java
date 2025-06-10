@@ -1,9 +1,11 @@
 package org.brokong.morakbackend.user.entity;
 
 import jakarta.persistence.*;
+import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.brokong.morakbackend.global.entity.BaseEntity;
 import org.brokong.morakbackend.post.entity.Post;
 import org.brokong.morakbackend.user.enums.LoginType;
@@ -12,6 +14,7 @@ import org.brokong.morakbackend.user.enums.UserStatus;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Getter
 @NoArgsConstructor
@@ -69,4 +72,15 @@ public class User extends BaseEntity {
         post.setUser(this);
     }
 
+    public void block() {
+        this.status = UserStatus.BLOCKED;
+    }
+
+    public void withdraw() {
+        this.status = UserStatus.WITHDRAWN;
+
+        // 특정 못하게 개인정보 파기
+        this.email = DigestUtils.sha256Hex(this.email + UUID.randomUUID());
+        this.nickname = "탈퇴한 사용자";
+    }
 }

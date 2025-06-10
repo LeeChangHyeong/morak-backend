@@ -6,6 +6,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.redis.RedisService;
+import org.brokong.morakbackend.user.entity.User;
+import org.brokong.morakbackend.user.enums.UserStatus;
+import org.brokong.morakbackend.user.repository.UserRepository;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,11 +25,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final RedisService redisService;
+    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+
 
         String accessToken = jwtUtil.extractAccessToken(request);
 
@@ -45,6 +50,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // 정상 토큰이면 인증 정보 설정
             String email = jwtUtil.getEmailFromAccessToken(accessToken);
             String role = jwtUtil.getRoleFromAccessToken(accessToken);
+
+            User user = userRepository.findByEmail(email)
+                            .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
+            if(user.getStatus() == UserStatus.BLOCKED) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"message\": \"차단된 사용자입니다.\n관리자에게 문의해주세요.\"}");
+                return;
+            }
 
             List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 

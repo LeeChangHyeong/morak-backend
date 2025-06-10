@@ -84,6 +84,8 @@ public class UserController {
     // 유저 탈퇴
     @PostMapping("/withdrawal")
     public ResponseEntity<ResponseDto<String>> withdrawal() {
+
+        userService.withdrawal();
         ResponseDto<String> response = new ResponseDto<>("회원탈퇴 성공", "회원탈퇴 되었습니다.");
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
@@ -91,8 +93,11 @@ public class UserController {
 
     // TODO: 관리자 계정만
     // 유저 차단
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("{userId}/block")
     public ResponseEntity<ResponseDto<String>> blockUser(@PathVariable Long userId) {
+        userService.blockUserById(userId);
+
         ResponseDto<String> response = new ResponseDto<>("유저 차단 성공", "유저가 차단되었습니다.");
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
