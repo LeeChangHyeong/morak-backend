@@ -52,4 +52,13 @@ public class UserService {
                 .map(UserResponseDto::new)
                 .toList();
     }
+
+	public List<UserResponseDto> getAllUsers() {
+
+        List<User> users = userRepository.findAll();
+
+        return users.stream()
+            .map(UserResponseDto::new)
+            .toList();
+	}
 }

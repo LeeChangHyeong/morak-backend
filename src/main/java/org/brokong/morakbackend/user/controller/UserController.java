@@ -6,6 +6,7 @@ import org.brokong.morakbackend.user.dto.response.UserResponseDto;
 import org.brokong.morakbackend.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -63,11 +64,14 @@ public class UserController {
 
     // 전체 유저 조회
     // 관리자 페이지
-//    @GetMapping
-//    public ResponseEntity<ResponseDto<List<UserResponseDto>>> getAllUsers() {
-//        ResponseDto<List<UserResponseDto>> response = new ResponseDto<>("전체 사용자 조회 성공", List.of(new UserResponseDto()));
-//        return ResponseEntity.status(HttpStatus.OK).body(response);
-//    }
+    @PreAuthorize("hasRole('ADMIN')")
+   @GetMapping
+   public ResponseEntity<ResponseDto<List<UserResponseDto>>> getAllUsers() {
+
+       List<UserResponseDto> users = userService.getAllUsers();
+
+       return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("전체 유저 조회 성공", users));
+   }
 
     // 유저 신고
     @PostMapping("/{userId}/report")
