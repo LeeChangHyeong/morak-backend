@@ -1,5 +1,6 @@
 package org.brokong.morakbackend.user.controller;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.response.ResponseDto;
 import org.brokong.morakbackend.user.dto.response.UserResponseDto;
@@ -7,9 +8,12 @@ import org.brokong.morakbackend.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -53,14 +57,6 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("유저 검색 성공", users));
     }
-
-    // 다중 유저 조회
-//    @GetMapping("/batch")
-//    public ResponseEntity<ResponseDto<List<UserResponseDto>>> getUsersByIds(@RequestParam List<Long> userIds) {
-//
-//        ResponseDto<List<UserResponseDto>> response = new ResponseDto<>("다중 사용자 조회 성공", List.of(new UserResponseDto()));
-//        return ResponseEntity.status(HttpStatus.OK).body(response);
-//    }
 
     // 전체 유저 조회
     // 관리자 페이지
