@@ -2,6 +2,8 @@ package org.brokong.morakbackend.post.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.brokong.morakbackend.global.entity.BaseEntity;
 import org.brokong.morakbackend.like.entity.PostLike;
 import org.brokong.morakbackend.user.entity.User;
@@ -9,6 +11,8 @@ import org.brokong.morakbackend.user.entity.User;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@NoArgsConstructor
 @Entity(name = "posts")
 public class Post extends BaseEntity {
 
@@ -37,9 +41,7 @@ public class Post extends BaseEntity {
     public Post(User user, String content) {
         this.user = user;
         this.content = content;
+        user.addPost(this);
     }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
 }

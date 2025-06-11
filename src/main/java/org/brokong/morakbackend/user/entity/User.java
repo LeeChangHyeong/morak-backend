@@ -1,7 +1,6 @@
 package org.brokong.morakbackend.user.entity;
 
 import jakarta.persistence.*;
-import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +13,7 @@ import org.brokong.morakbackend.user.enums.UserStatus;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 @Getter
@@ -69,7 +69,6 @@ public class User extends BaseEntity {
 
     public void addPost(Post post) {
         posts.add(post);
-        post.setUser(this);
     }
 
     public void block() {
