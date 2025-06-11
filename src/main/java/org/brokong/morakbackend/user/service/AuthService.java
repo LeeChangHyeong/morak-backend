@@ -66,7 +66,7 @@ public class AuthService {
         }
 
         if (user.getStatus() == UserStatus.BLOCKED) {
-            throw new IllegalArgumentException("차단된 계정입니다.\n관리자에게 문의해주세요.");
+            throw new IllegalArgumentException("차단된 사용자입니다. 관리자에게 문의해주세요.");
         }
 
         // JWT
