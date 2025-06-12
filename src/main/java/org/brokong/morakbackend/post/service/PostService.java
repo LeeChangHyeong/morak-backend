@@ -9,6 +9,7 @@ import org.brokong.morakbackend.user.entity.User;
 import org.brokong.morakbackend.user.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +18,7 @@ public class PostService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
 
+    @Transactional
     public PostResponseDto createPost(String content) {
 
         String email = SecurityUtil.getLoginEmail();
@@ -33,6 +35,7 @@ public class PostService {
         return PostResponseDto.from(post);
     }
 
+    @Transactional
     public void deletePost(Long postId) {
 
         String email = SecurityUtil.getLoginEmail();

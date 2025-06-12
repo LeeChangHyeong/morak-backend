@@ -11,8 +11,8 @@ import org.brokong.morakbackend.post.entity.Post;
 import org.brokong.morakbackend.post.repository.PostRepository;
 import org.brokong.morakbackend.user.entity.User;
 import org.brokong.morakbackend.user.repository.UserRepository;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +23,7 @@ public class CommentService {
 	private final PostRepository postRepository;
 	private final CommentLikeRepository commentLikeRepository;
 
+	@Transactional
 	public CommentResponseDto createComment(CommentRequestDto request) {
 
 		String email = SecurityUtil.getLoginEmail();
@@ -59,10 +60,20 @@ public class CommentService {
 		return CommentResponseDto.from(comment, likedByLoginUser);
 	}
 
+	@Transactional
 	public void deleteComment(Long commentId) {
 		String email = SecurityUtil.getLoginEmail();
 
+		Comment comment = commentRepository.findById(commentId).orElseThrow(
+			() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다.")
+		);
 
+		if(!comment.getUser().getEmail().equals(email)) {
+			throw new IllegalArgumentException("본인이 작성한 댓글만 삭제할 수 있습니다.");
+		}
 
+		comment.delete();
+
+		commentRepository.save(comment);
 	}
 }
