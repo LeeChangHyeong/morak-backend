@@ -1,6 +1,7 @@
 package org.brokong.morakbackend.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.brokong.morakbackend.global.Security.SecurityUtil;
 import org.brokong.morakbackend.user.dto.response.UserResponseDto;
 import org.brokong.morakbackend.user.entity.User;
 import org.brokong.morakbackend.user.repository.UserRepository;
@@ -17,7 +18,7 @@ public class UserService {
 
     public UserResponseDto getMyInfo() {
 
-        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = SecurityUtil.getLoginEmail();
 
         if (email == null) {
             throw new RuntimeException("인증 정보가 없습니다.");
@@ -70,7 +71,7 @@ public class UserService {
 	}
 
     public void withdrawal() {
-        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = SecurityUtil.getLoginEmail();
 
         User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
         user.withdraw();

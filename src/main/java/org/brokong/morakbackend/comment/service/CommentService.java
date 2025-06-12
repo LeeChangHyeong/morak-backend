@@ -5,6 +5,7 @@ import org.brokong.morakbackend.comment.dto.CommentRequestDto;
 import org.brokong.morakbackend.comment.dto.CommentResponseDto;
 import org.brokong.morakbackend.comment.entity.Comment;
 import org.brokong.morakbackend.comment.repository.CommentRepository;
+import org.brokong.morakbackend.global.Security.SecurityUtil;
 import org.brokong.morakbackend.like.Repository.CommentLikeRepository;
 import org.brokong.morakbackend.post.entity.Post;
 import org.brokong.morakbackend.post.repository.PostRepository;
@@ -23,8 +24,8 @@ public class CommentService {
 	private final CommentLikeRepository commentLikeRepository;
 
 	public CommentResponseDto createComment(CommentRequestDto request) {
-		
-		String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+		String email = SecurityUtil.getLoginEmail();
 		User user = userRepository.findByEmail(email).orElseThrow(
 			() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다.")
 		);
@@ -56,5 +57,12 @@ public class CommentService {
 		boolean likedByLoginUser = commentLikeRepository.existsByCommentAndUser(comment, user);
 
 		return CommentResponseDto.from(comment, likedByLoginUser);
+	}
+
+	public void deleteComment(Long commentId) {
+		String email = SecurityUtil.getLoginEmail();
+
+
+
 	}
 }

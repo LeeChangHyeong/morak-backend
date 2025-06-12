@@ -1,6 +1,7 @@
 package org.brokong.morakbackend.post.service;
 
 import lombok.RequiredArgsConstructor;
+import org.brokong.morakbackend.global.Security.SecurityUtil;
 import org.brokong.morakbackend.post.dto.PostResponseDto;
 import org.brokong.morakbackend.post.entity.Post;
 import org.brokong.morakbackend.post.repository.PostRepository;
@@ -18,7 +19,7 @@ public class PostService {
 
     public PostResponseDto createPost(String content) {
 
-        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = SecurityUtil.getLoginEmail();
 
         User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
@@ -34,7 +35,7 @@ public class PostService {
 
     public void deletePost(Long postId) {
 
-        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = SecurityUtil.getLoginEmail();
 
         User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
