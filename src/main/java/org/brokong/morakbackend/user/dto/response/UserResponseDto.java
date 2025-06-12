@@ -15,26 +15,33 @@ public class UserResponseDto {
     private Long id;
     private String email;
     private String nickname;
-    List<PostResponseDto> posts;
+    private List<PostResponseDto> posts;
     private LoginType loginType;
     private UserRoles role;
     private String accessToken;
     private String refreshToken;
 
-    public UserResponseDto(User user) {
-        this.id = user.getId();
-        this.email = user.getEmail();
-        this.nickname = user.getNickname();
-        this.posts = user.getPosts().stream()
-                .map(PostResponseDto::new)
-                .collect(Collectors.toList());
-        this.loginType = user.getLoginType();
-        this.role = user.getRole();
+    private UserResponseDto() {
+        // 기본 생성자는 private 으로 막아둠
     }
 
-    public UserResponseDto(User user, String accessToken, String refreshToken) {
-        this(user);
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
+    public static UserResponseDto from(User user) {
+        UserResponseDto dto = new UserResponseDto();
+        dto.id = user.getId();
+        dto.email = user.getEmail();
+        dto.nickname = user.getNickname();
+        dto.posts = user.getPosts().stream()
+                        .map(PostResponseDto::from)
+                        .collect(Collectors.toList());
+        dto.loginType = user.getLoginType();
+        dto.role = user.getRole();
+        return dto;
+    }
+
+    public static UserResponseDto from(User user, String accessToken, String refreshToken) {
+        UserResponseDto dto = from(user); // 위의 from(User)를 재사용
+        dto.accessToken = accessToken;
+        dto.refreshToken = refreshToken;
+        return dto;
     }
 }

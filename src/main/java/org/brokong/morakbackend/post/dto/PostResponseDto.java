@@ -11,12 +11,16 @@ public class PostResponseDto {
     private String createdAt;
     private String modifiedAt;
 
-    public PostResponseDto(Post post) {
-        this.id = post.getId();
-        this.content = post.getContent();
-        this.nickname = post.getUser().getNickname();
-        this.createdAt = post.getCreatedAt().toString();
-        this.modifiedAt = post.getModifiedAt().toString();
+    public static PostResponseDto from(Post post) {
+        PostResponseDto dto = new PostResponseDto();
+
+        dto.id = post.getId();
+        dto.content = post.getContent();
+        dto.nickname = post.getUser().getNickname();
+        dto.createdAt = post.getCreatedAt().toString();
+        dto.modifiedAt = post.getModifiedAt().toString();
+
+        return dto;
     }
 
 }
