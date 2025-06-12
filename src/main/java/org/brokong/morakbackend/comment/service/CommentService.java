@@ -1,5 +1,9 @@
 package org.brokong.morakbackend.comment.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.comment.dto.CommentRequestDto;
 import org.brokong.morakbackend.comment.dto.CommentResponseDto;
@@ -75,5 +79,45 @@ public class CommentService {
 		comment.delete();
 
 		commentRepository.save(comment);
+	}
+
+	public List<CommentResponseDto> getCommentsByPostId(Long postId) {
+
+		String email = SecurityUtil.getLoginEmail();
+
+		User user = userRepository.findByEmail(email).orElseThrow(
+			() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다.")
+		);
+
+		Post post = postRepository.findById(postId).orElseThrow(
+			() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다.")
+		);
+
+		List<Comment> comments = commentRepository.findAllByPostOrderByCreatedAtDesc(post);
+
+		// 댓글을 DTO로 변환
+		Map<Long, CommentResponseDto> dtoMap = new HashMap<>();
+		for (Comment comment : comments) {
+			boolean likedByLoginUser = commentLikeRepository.existsByCommentAndUser(comment, user);
+			dtoMap.put(comment.getId(), CommentResponseDto.from(comment, likedByLoginUser));
+		}
+
+		// 댓글 - 대댓글 관계 구성
+		List<CommentResponseDto> result = new ArrayList<>();
+		for (Comment comment : comments) {
+			Long parentId = comment.getParentComment() != null ? comment.getParentComment().getId() : null;
+
+			if(parentId == null) {
+				result.add(dtoMap.get(comment.getId()));
+			} else {
+				CommentResponseDto parentDto = dtoMap.get(parentId);
+				if(parentDto != null) {
+					parentDto.getChildren().add(dtoMap.get(comment.getId()));
+				}
+			}
+		}
+
+
+		return result;
 	}
 }
