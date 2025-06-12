@@ -9,15 +9,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-
 import java.util.ArrayList;
 import java.util.List;
-
+import lombok.Builder;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.entity.BaseEntity;
 import org.brokong.morakbackend.like.entity.CommentLike;
 import org.brokong.morakbackend.post.entity.Post;
 import org.brokong.morakbackend.user.entity.User;
 
+@Getter
+@RequiredArgsConstructor
 @Entity(name = "comments")
 public class Comment extends BaseEntity {
 
@@ -34,7 +37,6 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // ✅ 자기 자신을 참조하는 부모 댓글
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_comment_id")
     private Comment parentComment;
@@ -47,4 +49,17 @@ public class Comment extends BaseEntity {
 
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentLike> likes = new ArrayList<>();
+
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
+    @Builder
+    public Comment(Post post, User user, Comment parentComment, String content, long likeCount) {
+        this.post = post;
+        this.user = user;
+        this.parentComment = parentComment;
+        this.content = content;
+        this.likeCount = likeCount;
+    }
+
 }

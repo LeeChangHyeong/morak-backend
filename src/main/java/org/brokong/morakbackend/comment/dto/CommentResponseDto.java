@@ -14,8 +14,8 @@ public class CommentResponseDto {
 	private Long userId; // 작성자 id
 	private Long postId;
 	private Long parentId;
-	private boolean isDeleted;
-	private int likeCount;
+	private boolean isDeleted; // 삭제되면 true로 변경
+	private long likeCount;
 	private boolean likedByLoginUser; // 로그인 유저가 좋아요 눌렀는지
 	private String createdAt;
 	private String modifiedAt;
@@ -30,7 +30,7 @@ public class CommentResponseDto {
 		dto.postId = comment.getPost().getId();
 		dto.parentId = comment.getParentComment() != null ? comment.getParentComment().getId() : null;
 		dto.isDeleted = comment.isDeleted();
-		dto.likeCount = (int) comment.getLikeCount();
+		dto.likeCount = comment.getLikeCount();
 		dto.likedByLoginUser = likedByLoginUser;
 		dto.createdAt = comment.getCreatedAt().toString();
 		dto.modifiedAt = comment.getModifiedAt().toString();
