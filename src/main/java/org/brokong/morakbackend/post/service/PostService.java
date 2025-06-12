@@ -29,7 +29,7 @@ public class PostService {
 
         postRepository.save(post);
 
-        return new PostResponseDto(post);
+        return PostResponseDto.from(post);
     }
 
     public void deletePost(Long postId) {

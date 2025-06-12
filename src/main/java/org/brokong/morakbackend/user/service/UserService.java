@@ -25,7 +25,7 @@ public class UserService {
 
         User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("가입되지 않은 이메일입니다."));
 
-        return new UserResponseDto(user);
+        return UserResponseDto.from(user);
     }
 
 
@@ -33,14 +33,14 @@ public class UserService {
 
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        return new UserResponseDto(user);
+        return UserResponseDto.from(user);
     }
 
     public UserResponseDto getUserByNickname(String nickname) {
 
         User user = userRepository.findByNickname(nickname).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        return new UserResponseDto(user);
+        return UserResponseDto.from(user);
     }
 
 
@@ -49,7 +49,7 @@ public class UserService {
         List<User> users = userRepository.findByNicknameContaining(nickname);
 
         return users.stream()
-                .map(UserResponseDto::new)
+                .map(UserResponseDto::from)
                 .toList();
     }
 
@@ -58,7 +58,7 @@ public class UserService {
         List<User> users = userRepository.findAll();
 
         return users.stream()
-            .map(UserResponseDto::new)
+            .map(UserResponseDto::from)
             .toList();
 	}
 

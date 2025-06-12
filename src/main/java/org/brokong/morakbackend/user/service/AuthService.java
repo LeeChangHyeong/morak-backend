@@ -48,7 +48,7 @@ public class AuthService {
         }
 
 
-        return new UserResponseDto(user);
+        return UserResponseDto.from(user);
     }
 
     // 닉네임 중복 확인
@@ -78,7 +78,7 @@ public class AuthService {
         // Redis 저장 (key: email, value: refreshToken, 유효시간: 14일)
         redisService.setValue("refresh_token:" + user.getEmail(), refreshToken, Duration.ofDays(14));
 
-        return new UserResponseDto(user, accessToken, refreshToken);
+        return UserResponseDto.from(user, accessToken, refreshToken);
     }
 
     public void logout(HttpServletRequest request) {
