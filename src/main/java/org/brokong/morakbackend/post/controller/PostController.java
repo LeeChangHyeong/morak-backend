@@ -26,11 +26,18 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<ResponseDto> deletePost(@PathVariable Long postId) {
+    public ResponseEntity<ResponseDto<Void>> deletePost(@PathVariable Long postId) {
 
         postService.deletePost(postId);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("게시글이 성공적으로 삭제되었습니다.", null));
+    }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<ResponseDto<PostResponseDto>> getPost(@PathVariable Long postId) {
+        PostResponseDto responseDto = postService.getPost(postId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("게시글이 성공적으로 조회되었습니다.", responseDto));
     }
 
 }
