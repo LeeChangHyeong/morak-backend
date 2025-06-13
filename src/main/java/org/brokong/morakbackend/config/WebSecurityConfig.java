@@ -47,6 +47,7 @@ public class WebSecurityConfig {
                                 apiPrefix + "/auth/check-nickname",
                                 apiPrefix + "/auth/check-email",
                                 apiPrefix + "/email/**",
+                                apiPrefix + "/posts",
                                 apiPrefix + "/posts/*"
                         ).permitAll()
                         .anyRequest().authenticated()
@@ -58,4 +59,3 @@ public class WebSecurityConfig {
         return http.build();
     }
 }
-
