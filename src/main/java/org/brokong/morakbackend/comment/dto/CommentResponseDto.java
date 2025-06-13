@@ -24,7 +24,7 @@ public class CommentResponseDto {
 	public static CommentResponseDto from(Comment comment, boolean likedByLoginUser){
 		CommentResponseDto dto = new CommentResponseDto();
 		dto.id = comment.getId();
-		dto.content = comment.isDeleted() ? "삭제된 댓글입니다." : comment.getContent();
+		dto.content = comment.getContent();
 		dto.nickname = comment.getUser().getNickname();
 		dto.userId = comment.getUser().getId();
 		dto.postId = comment.getPost().getId();
