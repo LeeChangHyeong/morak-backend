@@ -66,4 +66,7 @@ public class Comment extends BaseEntity {
         this.isDeleted = true;
     }
 
+    public void update(String content) {
+        this.content = content;
+    }
 }

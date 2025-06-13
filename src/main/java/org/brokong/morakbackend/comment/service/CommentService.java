@@ -7,6 +7,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.comment.dto.CommentRequestDto;
 import org.brokong.morakbackend.comment.dto.CommentResponseDto;
+import org.brokong.morakbackend.comment.dto.CommentUpdateRequestDto;
 import org.brokong.morakbackend.comment.entity.Comment;
 import org.brokong.morakbackend.comment.repository.CommentRepository;
 import org.brokong.morakbackend.global.Security.SecurityUtil;
@@ -117,5 +118,28 @@ public class CommentService {
 		}
 
 		return result;
+	}
+
+	public CommentResponseDto updateComment(Long commentId, CommentUpdateRequestDto request) {
+
+		String email = SecurityUtil.getLoginEmail();
+
+		User user = userRepository.findByEmail(email).orElseThrow(
+			() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다.")
+		);
+
+		Comment comment = commentRepository.findById(commentId).orElseThrow(
+			() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다.")
+		);
+
+		if (!comment.getUser().getEmail().equals(email)) {
+			throw new IllegalArgumentException("본인이 작성한 댓글만 수정이 가능합니다.");
+		}
+
+		comment.update(request.getContent());
+
+		boolean likedByLoginUser = commentLikeRepository.existsByCommentAndUser(comment, user);
+
+		return CommentResponseDto.from(comment, likedByLoginUser);
 	}
 }

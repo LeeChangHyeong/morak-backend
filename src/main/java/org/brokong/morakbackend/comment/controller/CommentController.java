@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.comment.dto.CommentRequestDto;
 import org.brokong.morakbackend.comment.dto.CommentResponseDto;
+import org.brokong.morakbackend.comment.dto.CommentUpdateRequestDto;
 import org.brokong.morakbackend.comment.service.CommentService;
 import org.brokong.morakbackend.global.response.ResponseDto;
 import org.springframework.http.HttpStatus;
@@ -44,6 +45,13 @@ public class CommentController {
 		List<CommentResponseDto> comments = commentService.getCommentsByPostId(postId);
 
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("댓글 조회 성공", comments));
+	}
+
+	@PostMapping("/{commentId}")
+	public ResponseEntity<ResponseDto<CommentResponseDto>> updateComment(@PathVariable Long commentId, @RequestBody CommentUpdateRequestDto request) {
+		CommentResponseDto responseDto = commentService.updateComment(commentId, request);
+
+		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("댓글 수정 성공", responseDto));
 	}
 
 }
