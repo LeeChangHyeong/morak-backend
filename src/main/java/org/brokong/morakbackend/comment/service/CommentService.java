@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CommentService {
 
-	private final CommentRepository	commentRepository;
+	private final CommentRepository commentRepository;
 	private final UserRepository userRepository;
 	private final PostRepository postRepository;
 	private final CommentLikeRepository commentLikeRepository;
@@ -36,7 +36,7 @@ public class CommentService {
 		);
 		Post post = postRepository.findById(request.getPostId()).orElseThrow(
 			() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다.")
-			);
+		);
 
 		Comment parentComment = null;
 
@@ -48,7 +48,6 @@ public class CommentService {
 				throw new IllegalArgumentException("대댓글의 대댓글은 허용되지 않습니다.");
 			}
 		}
-
 
 		Comment comment = Comment.builder()
 								 .post(post)
@@ -72,7 +71,7 @@ public class CommentService {
 			() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다.")
 		);
 
-		if(!comment.getUser().getEmail().equals(email)) {
+		if (!comment.getUser().getEmail().equals(email)) {
 			throw new IllegalArgumentException("본인이 작성한 댓글만 삭제할 수 있습니다.");
 		}
 
@@ -93,7 +92,7 @@ public class CommentService {
 			() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다.")
 		);
 
-		List<Comment> comments = commentRepository.findAllByPostOrderByCreatedAtDesc(post);
+		List<Comment> comments = commentRepository.findAllByPostWithUserAndParent(post);
 
 		// 댓글을 DTO로 변환
 		Map<Long, CommentResponseDto> dtoMap = new HashMap<>();
@@ -107,16 +106,15 @@ public class CommentService {
 		for (Comment comment : comments) {
 			Long parentId = comment.getParentComment() != null ? comment.getParentComment().getId() : null;
 
-			if(parentId == null) {
+			if (parentId == null) {
 				result.add(dtoMap.get(comment.getId()));
 			} else {
 				CommentResponseDto parentDto = dtoMap.get(parentId);
-				if(parentDto != null) {
+				if (parentDto != null) {
 					parentDto.getChildren().add(dtoMap.get(comment.getId()));
 				}
 			}
 		}
-
 
 		return result;
 	}
