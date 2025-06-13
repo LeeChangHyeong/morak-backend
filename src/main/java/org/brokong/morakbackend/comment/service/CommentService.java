@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.comment.dto.CommentRequestDto;
 import org.brokong.morakbackend.comment.dto.CommentResponseDto;
@@ -12,6 +14,7 @@ import org.brokong.morakbackend.comment.entity.Comment;
 import org.brokong.morakbackend.comment.repository.CommentRepository;
 import org.brokong.morakbackend.global.Security.SecurityUtil;
 import org.brokong.morakbackend.like.Repository.CommentLikeRepository;
+import org.brokong.morakbackend.like.entity.CommentLike;
 import org.brokong.morakbackend.post.entity.Post;
 import org.brokong.morakbackend.post.repository.PostRepository;
 import org.brokong.morakbackend.user.entity.User;
@@ -82,7 +85,6 @@ public class CommentService {
 	}
 
 	public List<CommentResponseDto> getCommentsByPostId(Long postId) {
-
 		String email = SecurityUtil.getLoginEmail();
 
 		User user = userRepository.findByEmail(email).orElseThrow(
@@ -93,32 +95,47 @@ public class CommentService {
 			() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다.")
 		);
 
+		// 댓글 + 작성자 + 부모 댓글까지 모두 fetch join으로 가져오기
 		List<Comment> comments = commentRepository.findAllByPostWithUserAndParent(post);
+
+		// 댓글 ID 목록 추출
+		List<Long> commentIds = comments.stream()
+										.map(Comment::getId)
+										.collect(Collectors.toList());
+
+		// 로그인 유저가 좋아요 누른 댓글 ID 목록 조회 (쿼리 1회)
+		List<CommentLike> likes = commentLikeRepository.findAllByCommentIdInAndUser(commentIds, user);
+		Set<Long> likedCommentIds = likes.stream()
+										 .map(like -> like.getComment().getId())
+										 .collect(Collectors.toSet());
 
 		// 댓글을 DTO로 변환
 		Map<Long, CommentResponseDto> dtoMap = new HashMap<>();
 		for (Comment comment : comments) {
-			boolean likedByLoginUser = commentLikeRepository.existsByCommentAndUser(comment, user);
+			boolean likedByLoginUser = likedCommentIds.contains(comment.getId());
 			dtoMap.put(comment.getId(), CommentResponseDto.from(comment, likedByLoginUser));
 		}
 
-		// 댓글 - 대댓글 관계 구성
+		// 댓글 - 대댓글 계층 구성
 		List<CommentResponseDto> result = new ArrayList<>();
 		for (Comment comment : comments) {
-			Long parentId = comment.getParentComment() != null ? comment.getParentComment().getId() : null;
+			Long parentId = comment.getParentComment() != null
+							? comment.getParentComment().getId()
+							: null;
 
 			if (parentId == null) {
-				result.add(dtoMap.get(comment.getId()));
+				result.add(dtoMap.get(comment.getId())); // 최상위 댓글
 			} else {
 				CommentResponseDto parentDto = dtoMap.get(parentId);
 				if (parentDto != null) {
-					parentDto.getChildren().add(dtoMap.get(comment.getId()));
+					parentDto.getChildren().add(dtoMap.get(comment.getId())); // 대댓글 추가
 				}
 			}
 		}
 
 		return result;
 	}
+
 
 	public CommentResponseDto updateComment(Long commentId, CommentUpdateRequestDto request) {
 
@@ -132,11 +149,16 @@ public class CommentService {
 			() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다.")
 		);
 
+		if(comment.isDeleted()) {
+			throw new IllegalArgumentException("삭제된 댓글은 수정이 불가능합니다.");
+		}
+
 		if (!comment.getUser().getEmail().equals(email)) {
 			throw new IllegalArgumentException("본인이 작성한 댓글만 수정이 가능합니다.");
 		}
 
-		comment.update(request.getContent());
+		comment.updateContent(request.getContent());
+		commentRepository.save(comment);
 
 		boolean likedByLoginUser = commentLikeRepository.existsByCommentAndUser(comment, user);
 

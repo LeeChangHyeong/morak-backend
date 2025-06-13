@@ -7,10 +7,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.Getter;
 import org.brokong.morakbackend.comment.entity.Comment;
 import org.brokong.morakbackend.global.entity.BaseEntity;
 import org.brokong.morakbackend.user.entity.User;
 
+@Getter
 @Entity(name = "comment_likes")
 public class CommentLike extends BaseEntity {
 
