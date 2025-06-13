@@ -41,3 +41,6 @@ replay_pid*
 # Allow template configs
 !/src/main/resources/application.properties.example
 !/src/main/resources/application.yml.example
+
+# QueryDSL generated sources
+/build/generated/
