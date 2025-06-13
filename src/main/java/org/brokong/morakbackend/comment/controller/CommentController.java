@@ -41,7 +41,6 @@ public class CommentController {
 
 	@GetMapping
 	public ResponseEntity<ResponseDto<List<CommentResponseDto>>> getComments(@RequestParam Long postId) {
-
 		List<CommentResponseDto> comments = commentService.getCommentsByPostId(postId);
 
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("댓글 조회 성공", comments));
@@ -52,6 +51,13 @@ public class CommentController {
 		CommentResponseDto responseDto = commentService.updateComment(commentId, request);
 
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("댓글 수정 성공", responseDto));
+	}
+
+	@PostMapping("/{commentId}/like")
+	public ResponseEntity<ResponseDto<Boolean>> likeComment(@PathVariable Long commentId) {
+		boolean liked = commentService.likeComment(commentId);
+
+		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("댓글 좋아요 상태 변경", liked));
 	}
 
 }

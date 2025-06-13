@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -75,6 +76,10 @@ public class CommentService {
 			() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다.")
 		);
 
+		if(comment.isDeleted()) {
+			throw new IllegalArgumentException("이미 삭제된 댓글입니다.");
+		}
+
 		if (!comment.getUser().getEmail().equals(email)) {
 			throw new IllegalArgumentException("본인이 작성한 댓글만 삭제할 수 있습니다.");
 		}
@@ -137,6 +142,7 @@ public class CommentService {
 	}
 
 
+	@Transactional
 	public CommentResponseDto updateComment(Long commentId, CommentUpdateRequestDto request) {
 
 		String email = SecurityUtil.getLoginEmail();
@@ -163,5 +169,39 @@ public class CommentService {
 		boolean likedByLoginUser = commentLikeRepository.existsByCommentAndUser(comment, user);
 
 		return CommentResponseDto.from(comment, likedByLoginUser);
+	}
+
+	@Transactional
+	public boolean likeComment(Long commentId) {
+		String email = SecurityUtil.getLoginEmail();
+
+		User user = userRepository.findByEmail(email).orElseThrow(
+			() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다.")
+		);
+
+		Comment comment = commentRepository.findById(commentId).orElseThrow(
+			() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
+
+		if(comment.isDeleted()) {
+			throw new IllegalArgumentException("삭제된 댓글에는 좋아요를 할 수 없습니다.");
+		}
+
+		Optional<CommentLike> existing = commentLikeRepository.findByCommentAndUser(comment, user);
+
+		if(existing.isPresent()) { // 이미 좋아요를 눌렀으면
+			commentLikeRepository.delete(existing.get());
+			comment.decreaseLikeCount();
+
+			return false;
+		} else {
+			CommentLike commentLike = CommentLike.builder()
+				.comment(comment)
+				.user(user)
+				.build();
+			commentLikeRepository.save(commentLike);
+			comment.increaseLikeCount();
+
+			return true;
+		}
 	}
 }
