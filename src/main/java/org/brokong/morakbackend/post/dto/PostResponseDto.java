@@ -8,6 +8,7 @@ public class PostResponseDto {
     private Long id;
     private String content;
     private String nickname;
+    private Long likeCount;
     private String createdAt;
     private String modifiedAt;
 
@@ -17,6 +18,7 @@ public class PostResponseDto {
         dto.id = post.getId();
         dto.content = post.getContent();
         dto.nickname = post.getUser().getNickname();
+        dto.likeCount = post.getLikeCount();
         dto.createdAt = post.getCreatedAt().toString();
         dto.modifiedAt = post.getModifiedAt().toString();
 
