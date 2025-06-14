@@ -8,10 +8,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import org.brokong.morakbackend.comment.entity.Comment;
 import org.brokong.morakbackend.global.entity.BaseEntity;
 import org.brokong.morakbackend.post.entity.Post;
 import org.brokong.morakbackend.user.entity.User;
 
+@NoArgsConstructor
 @Entity(name = "post_likes")
 public class PostLike extends BaseEntity {
 
@@ -27,4 +31,10 @@ public class PostLike extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
+
+    @Builder
+    public PostLike(User user, Post post) {
+        this.user = user;
+        this.post = post;
+    }
 }

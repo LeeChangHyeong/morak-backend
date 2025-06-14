@@ -18,7 +18,6 @@ public class PostController {
 
 	private final PostService postService;
 
-
 	@PostMapping
 	public ResponseEntity<ResponseDto<PostResponseDto>> createPost(@RequestBody PostRequestDto requestDto) {
 
@@ -53,4 +52,10 @@ public class PostController {
 		return ResponseEntity.ok(new ResponseDto<>("게시글 목록 조회 성공", posts));
 	}
 
+	@PostMapping("/{postId}/like")
+	public ResponseEntity<ResponseDto<Boolean>> likePost(@PathVariable Long postId) {
+		Boolean liked = postService.likePost(postId);
+
+		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("게시글 좋아요 상태변경", liked));
+	}
 }

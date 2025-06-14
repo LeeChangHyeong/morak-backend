@@ -1,7 +1,11 @@
 package org.brokong.morakbackend.post.service;
 
 import lombok.RequiredArgsConstructor;
+import org.brokong.morakbackend.comment.entity.Comment;
 import org.brokong.morakbackend.global.Security.SecurityUtil;
+import org.brokong.morakbackend.like.Repository.PostLikeRepository;
+import org.brokong.morakbackend.like.entity.CommentLike;
+import org.brokong.morakbackend.like.entity.PostLike;
 import org.brokong.morakbackend.post.dto.PostResponseDto;
 import org.brokong.morakbackend.post.entity.Post;
 import org.brokong.morakbackend.post.query.PostQueryRepository;
@@ -14,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class PostService {
@@ -21,6 +27,7 @@ public class PostService {
 	private final UserRepository userRepository;
 	private final PostRepository postRepository;
 	private final PostQueryRepository postQueryRepository;
+	private final PostLikeRepository postLikeRepostory;
 
 	@Transactional
 	public PostResponseDto createPost(String content) {
@@ -68,5 +75,38 @@ public class PostService {
 		Page<Post> posts = postQueryRepository.findAllWithSorting(pageable, sortBy);
 
 		return posts.map(PostResponseDto::from);
+	}
+
+	@Transactional
+	public boolean likePost(Long postId) {
+		String email = SecurityUtil.getLoginEmail();
+
+		User user = userRepository.findByEmail(email).orElseThrow(
+				() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다.")
+		);
+
+		Post post = postRepository.findById(postId).orElseThrow(
+				() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+
+		Optional<PostLike> existing = postLikeRepostory.findByPostAndUser(post, user);
+
+		if(existing.isPresent()) { // 이미 좋아요를 눌렀으면
+			postLikeRepostory.delete(existing.get());
+			post.decreaseLikeCount();
+			postRepository.save(post);
+
+			return false;
+		} else {
+			PostLike postLike = PostLike.builder()
+					.post(post)
+					.user(user)
+					.build();
+
+			post.increaseLikeCount();
+			postRepository.save(post);
+			postLikeRepostory.save(postLike);
+
+			return true;
+		}
 	}
 }

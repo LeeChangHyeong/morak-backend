@@ -191,6 +191,7 @@ public class CommentService {
 		if(existing.isPresent()) { // 이미 좋아요를 눌렀으면
 			commentLikeRepository.delete(existing.get());
 			comment.decreaseLikeCount();
+			commentRepository.save(comment);
 
 			return false;
 		} else {
@@ -198,8 +199,10 @@ public class CommentService {
 				.comment(comment)
 				.user(user)
 				.build();
-			commentLikeRepository.save(commentLike);
+
 			comment.increaseLikeCount();
+			commentRepository.save(comment);
+			commentLikeRepository.save(commentLike);
 
 			return true;
 		}
