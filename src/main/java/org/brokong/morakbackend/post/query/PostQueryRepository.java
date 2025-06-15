@@ -27,9 +27,18 @@ public class PostQueryRepository {
 
 		// 동적 정렬 처리
 		switch (sortBy) {
-			case "likeCount" -> query.orderBy(post.likeCount.desc());
-			case "viewCount" -> query.orderBy(post.viewCount.desc());
-			default -> query.orderBy(post.createdAt.desc());
+			case "likeCount":
+				// likeCount로 정렬 후 같으면 createdAt으로 정렬
+				query.orderBy(post.likeCount.desc(), post.createdAt.desc());
+				break;
+			case "viewCount":
+				// viewCount로 정렬 후 같으면 createdAt으로 정렬
+				query.orderBy(post.viewCount.desc(), post.createdAt.desc());
+				break;
+			default:
+				// 기본적으로 createdAt으로 정렬
+				query.orderBy(post.createdAt.desc());
+				break;
 		}
 
 		List<Post> posts = query
