@@ -52,4 +52,7 @@ public class Post extends BaseEntity {
         this.likeCount++;
     }
 
+    public void updateContent(String content) {
+        this.content = content;
+    }
 }

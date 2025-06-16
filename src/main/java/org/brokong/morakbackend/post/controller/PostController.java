@@ -58,4 +58,14 @@ public class PostController {
 
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("게시글 좋아요 상태변경", liked));
 	}
+
+	@PutMapping("/{postId}")
+	public ResponseEntity<ResponseDto<PostResponseDto>> updatePost(
+		@PathVariable Long postId,
+		@RequestBody PostRequestDto requestDto
+	) {
+		PostResponseDto responseDto = postService.updatePost(postId, requestDto.getContent());
+
+		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("게시글이 성공적으로 수정되었습니다.", responseDto));
+	}
 }
