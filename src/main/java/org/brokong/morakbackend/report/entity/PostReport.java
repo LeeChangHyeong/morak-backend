@@ -11,7 +11,7 @@ import org.brokong.morakbackend.post.entity.Post;
 @NoArgsConstructor
 @SuperBuilder
 @Entity(name = "post_reports")
-public class PostReport extends Report {
+public class PostReport extends Report{
 
 	@Id
 	@GeneratedValue
