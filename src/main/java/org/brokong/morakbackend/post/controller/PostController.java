@@ -2,7 +2,7 @@ package org.brokong.morakbackend.post.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.response.ResponseDto;
-import org.brokong.morakbackend.post.dto.PostRequestDto;
+import org.brokong.morakbackend.report.dto.PostReportRequestDto;
 import org.brokong.morakbackend.post.dto.PostResponseDto;
 import org.brokong.morakbackend.post.service.PostService;
 
@@ -19,7 +19,7 @@ public class PostController {
 	private final PostService postService;
 
 	@PostMapping
-	public ResponseEntity<ResponseDto<PostResponseDto>> createPost(@RequestBody PostRequestDto requestDto) {
+	public ResponseEntity<ResponseDto<PostResponseDto>> createPost(@RequestBody PostReportRequestDto requestDto) {
 
 		PostResponseDto responseDto = postService.createPost(requestDto.getContent());
 
@@ -48,7 +48,7 @@ public class PostController {
 		@RequestParam(defaultValue = "10") int size,
 		@RequestParam(defaultValue = "createdAt") String sortBy) {
 
-		Page<PostResponseDto> posts = postService.getPostList(page - 1 , size, sortBy);
+		Page<PostResponseDto> posts = postService.getPostList(page - 1, size, sortBy);
 		return ResponseEntity.ok(new ResponseDto<>("게시글 목록 조회 성공", posts));
 	}
 
@@ -62,7 +62,7 @@ public class PostController {
 	@PutMapping("/{postId}")
 	public ResponseEntity<ResponseDto<PostResponseDto>> updatePost(
 		@PathVariable Long postId,
-		@RequestBody PostRequestDto requestDto
+		@RequestBody PostReportRequestDto requestDto
 	) {
 		PostResponseDto responseDto = postService.updatePost(postId, requestDto.getContent());
 
@@ -76,6 +76,13 @@ public class PostController {
 		@RequestParam(defaultValue = "createdAt") String sortBy) {
 
 		Page<PostResponseDto> posts = postService.getMyPostList(page - 1, size, sortBy);
-		return ResponseEntity.ok(new ResponseDto<>("내 게시글 목록 조회 성공", posts));
+		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("내 게시글 목록 조회 성공", posts));
+	}
+
+	@PostMapping("/{postId}/report")
+	public ResponseEntity<ResponseDto<Void>> reportPost(@PathVariable Long postId, @RequestBody PostReportRequestDto requestDto) {
+		postService.reportPost(postId, requestDto);
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDto<>("게시글이 성공적으로 신고되었습니다.", null));
 	}
 }
