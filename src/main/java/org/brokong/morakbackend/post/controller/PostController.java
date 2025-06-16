@@ -68,4 +68,14 @@ public class PostController {
 
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("게시글이 성공적으로 수정되었습니다.", responseDto));
 	}
+
+	@GetMapping("/me")
+	public ResponseEntity<ResponseDto<Page<PostResponseDto>>> getMyPosts(
+		@RequestParam(defaultValue = "1") int page,
+		@RequestParam(defaultValue = "10") int size,
+		@RequestParam(defaultValue = "createdAt") String sortBy) {
+
+		Page<PostResponseDto> posts = postService.getMyPostList(page - 1, size, sortBy);
+		return ResponseEntity.ok(new ResponseDto<>("내 게시글 목록 조회 성공", posts));
+	}
 }

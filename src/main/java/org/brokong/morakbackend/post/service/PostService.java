@@ -125,4 +125,14 @@ public class PostService {
 
 		return PostResponseDto.from(post);
 	}
+
+	public Page<PostResponseDto> getMyPostList(int page, int size, String sortBy) {
+		String email = SecurityUtil.getLoginEmail();
+		User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+		Pageable pageable = PageRequest.of(page, size);
+
+		Page<Post> posts = postQueryRepository.findAllByUserWithSorting(pageable, sortBy, user.getId());
+
+		return posts.map(PostResponseDto::from);
+	}
 }
