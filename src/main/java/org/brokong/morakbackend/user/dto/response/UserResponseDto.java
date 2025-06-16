@@ -1,6 +1,7 @@
 package org.brokong.morakbackend.user.dto.response;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.brokong.morakbackend.post.dto.PostResponseDto;
 import org.brokong.morakbackend.user.entity.User;
 import org.brokong.morakbackend.user.enums.LoginType;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
+@NoArgsConstructor
 public class UserResponseDto {
 
     private Long id;
@@ -20,10 +22,6 @@ public class UserResponseDto {
     private UserRoles role;
     private String accessToken;
     private String refreshToken;
-
-    private UserResponseDto() {
-        // 기본 생성자는 private 으로 막아둠
-    }
 
     public static UserResponseDto from(User user) {
         UserResponseDto dto = new UserResponseDto();

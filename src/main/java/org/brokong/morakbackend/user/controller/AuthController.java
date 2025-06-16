@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.response.ResponseDto;
 import org.brokong.morakbackend.user.dto.request.LoginRequestDto;
 import org.brokong.morakbackend.user.dto.request.SignupRequestDto;
+import org.brokong.morakbackend.user.dto.response.LoginResponseDto;
 import org.brokong.morakbackend.user.dto.response.UserResponseDto;
 import org.brokong.morakbackend.user.service.AuthService;
 import org.springframework.http.HttpStatus;
@@ -38,11 +39,11 @@ public class AuthController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<ResponseDto<UserResponseDto>> login(@RequestBody LoginRequestDto request) {
+    public ResponseEntity<ResponseDto<LoginResponseDto>> login(@RequestBody LoginRequestDto request) {
 
-        UserResponseDto userResponseDto = authService.login(request.getEmail(), request.getPassword());
+        LoginResponseDto loginResponseDto = authService.login(request.getEmail(), request.getPassword());
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("로그인 성공", userResponseDto));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("로그인 성공", loginResponseDto));
     }
 //
 //    // 카카오 소셜 로그인

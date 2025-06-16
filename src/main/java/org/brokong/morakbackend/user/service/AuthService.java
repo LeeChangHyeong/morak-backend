@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.jwt.JwtUtil;
 import org.brokong.morakbackend.global.redis.RedisService;
+import org.brokong.morakbackend.user.dto.response.LoginResponseDto;
 import org.brokong.morakbackend.user.dto.response.UserResponseDto;
 import org.brokong.morakbackend.user.entity.User;
 import org.brokong.morakbackend.user.enums.LoginType;
@@ -56,7 +57,7 @@ public class AuthService {
         return !userRepository.existsByNickname(nickname); // 중복이 없으면 true 반환
     }
 
-    public UserResponseDto login(String email, String password) {
+    public LoginResponseDto login(String email, String password) {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 이메일입니다."));
@@ -78,7 +79,7 @@ public class AuthService {
         // Redis 저장 (key: email, value: refreshToken, 유효시간: 14일)
         redisService.setValue("refresh_token:" + user.getEmail(), refreshToken, Duration.ofDays(14));
 
-        return UserResponseDto.from(user, accessToken, refreshToken);
+        return LoginResponseDto.from(user, accessToken, refreshToken);
     }
 
     public void logout(HttpServletRequest request) {
