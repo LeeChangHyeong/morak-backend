@@ -189,4 +189,38 @@ public class CommentService {
 		return rootComments.map(comment ->
 									CommentResponseDto.from(comment, likedCommentIds.contains(comment.getId()), commentRepository.existsByParentComment(comment)));
 	}
+
+	public Page<CommentResponseDto> getReplies(Long parentId, int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
+
+		Page<Comment> replies = commentQueryRepository.findRepliesByParentComment(parentId, pageable);
+
+		Optional<String> optionalEmail = SecurityUtil.getOptionalLoginEmail();
+
+		if(optionalEmail.isEmpty()) {
+			// 비로그인시 모든 댓글 likedByLoginUser = false
+			return replies.map(comment -> CommentResponseDto.from(comment, false, false));
+		}
+
+		// 로그인 유저면
+		String email = optionalEmail.get();
+
+		User user = userRepository.findByEmail(email)
+								  .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+		// 댓글 ID 추출
+		List<Long> commentIds = replies.getContent().stream()
+											.map(Comment::getId)
+											.toList();
+
+		// 로그인 유저가 좋아요 누른 댓글 ID 추출
+		Set<Long> likedCommentIds = commentLikeRepository.findAllByCommentIdInAndUser(commentIds, user)
+														 .stream()
+														 .map(like -> like.getComment().getId())
+														 .collect(Collectors.toSet());
+
+
+		return replies.map(comment ->
+									CommentResponseDto.from(comment, likedCommentIds.contains(comment.getId()), commentRepository.existsByParentComment(comment)));
+	}
 }

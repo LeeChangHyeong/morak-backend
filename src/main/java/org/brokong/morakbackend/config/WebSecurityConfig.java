@@ -49,7 +49,8 @@ public class WebSecurityConfig {
                                 apiPrefix + "/email/**",
                                 apiPrefix + "/posts",
                                 apiPrefix + "/posts/*",
-                                apiPrefix + "/comments/root"
+                                apiPrefix + "/comments/root",
+                                apiPrefix + "/comments/*/replies"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

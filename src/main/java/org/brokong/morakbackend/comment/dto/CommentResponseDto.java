@@ -35,7 +35,7 @@ public class CommentResponseDto {
 		dto.createdAt = comment.getCreatedAt().toString();
 		dto.modifiedAt = comment.getModifiedAt().toString();
 		dto.hasChildren = hasChildren;
-		// children은 나중에 재귀적으로 세팅
+
 		return dto;
 	}
 }

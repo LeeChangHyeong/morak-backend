@@ -56,4 +56,25 @@ public class CommentQueryRepository {
 		return new PageImpl<>(comments, pageable, total != null ? total : 0L);
 	}
 
+	public Page<Comment> findRepliesByParentComment(Long parentId, Pageable pageable) {
+		QComment comment = QComment.comment;
+		QUser user = QUser.user;
+
+		List<Comment> replies = jpaQueryFactory
+			.selectFrom(comment)
+			.leftJoin(comment.user, user).fetchJoin()
+			.where(comment.parentComment.id.eq(parentId))
+			.orderBy(comment.createdAt.asc()) // 오래된순 고정
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize())
+			.fetch();
+
+		Long total = jpaQueryFactory
+			.select(comment.count())
+			.from(comment)
+			.where(comment.parentComment.id.eq(parentId))
+			.fetchOne();
+
+		return new PageImpl<>(replies, pageable, total != null ? total : 0L);
+	}
 }

@@ -66,4 +66,15 @@ public class CommentController {
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("루트 댓글 조회 성공", comments));
 	}
 
+	@GetMapping("/{parentId}/replies")
+	public ResponseEntity<ResponseDto<Page<CommentResponseDto>>> getReplies(
+		@PathVariable Long parentId,
+		@RequestParam(defaultValue = "1") int page,
+		@RequestParam(defaultValue = "10") int size
+	) {
+		Page<CommentResponseDto> replies = commentService.getReplies(parentId, page-1, size);
+
+		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("대댓글 조회 성공", replies));
+	}
+
 }
