@@ -33,6 +33,13 @@ public class CommentController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDto<>("댓글 작성 성공", responseDto));
 	}
 
+	@GetMapping("/{commentId}")
+	public ResponseEntity<ResponseDto<CommentResponseDto>> getCommentById(@PathVariable Long commentId) {
+		CommentResponseDto comment = commentService.getCommentById(commentId);
+		return ResponseEntity.ok(new ResponseDto<>("댓글 조회 성공", comment));
+	}
+
+
 	@DeleteMapping("/{commentId}")
 	public ResponseEntity<ResponseDto<Void>> deleteComment(@PathVariable Long commentId) {
 		commentService.deleteComment(commentId);

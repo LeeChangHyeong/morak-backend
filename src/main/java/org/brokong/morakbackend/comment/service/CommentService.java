@@ -223,4 +223,29 @@ public class CommentService {
 		return replies.map(comment ->
 									CommentResponseDto.from(comment, likedCommentIds.contains(comment.getId()), commentRepository.existsByParentComment(comment)));
 	}
+
+	public CommentResponseDto getCommentById(Long commentId) {
+		Optional<String> optionalEmail = SecurityUtil.getOptionalLoginEmail();
+
+		Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
+
+		if(optionalEmail.isEmpty()) {
+			// 비로그인시 모든 댓글 likedByLoginUser = false
+			return CommentResponseDto.from(comment, false, false);
+		}
+
+		// 로그인 유저면
+		String email = optionalEmail.get();
+
+		User user = userRepository.findByEmail(email)
+								  .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+		// 댓글 ID 추출
+		Long commentIds = comment.getId();
+
+		// 로그인 유저가 좋아요 누른 댓글 ID 추출
+		Set<Long> likedCommentIds = commentLikeRepository.findLikedCommentIdsByUser(user);
+
+		return CommentResponseDto.from(comment, likedCommentIds.contains(commentIds), commentRepository.existsByParentComment(comment));
+	}
 }
