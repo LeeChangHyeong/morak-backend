@@ -7,6 +7,7 @@ import org.brokong.morakbackend.comment.entity.Comment;
 import org.brokong.morakbackend.like.entity.CommentLike;
 import org.brokong.morakbackend.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -18,5 +19,6 @@ public interface CommentLikeRepository extends JpaRepository<CommentLike, Long> 
 
 	Optional<CommentLike> findByCommentAndUser(Comment comment, User user);
 
+	@Query("SELECT cl.comment.id FROM comment_likes cl WHERE cl.user = :user")
 	Set<Long> findLikedCommentIdsByUser(User user);
 }
