@@ -18,9 +18,6 @@ import org.brokong.morakbackend.global.entity.BaseEntity;
 import org.brokong.morakbackend.like.entity.CommentLike;
 import org.brokong.morakbackend.post.entity.Post;
 import org.brokong.morakbackend.user.entity.User;
-import org.brokong.morakbackend.user.enums.LoginType;
-import org.brokong.morakbackend.user.enums.UserRoles;
-import org.brokong.morakbackend.user.enums.UserStatus;
 
 @Getter
 @RequiredArgsConstructor

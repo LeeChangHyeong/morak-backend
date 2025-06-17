@@ -145,7 +145,7 @@ public class PostService {
 
 		String email = SecurityUtil.getLoginEmail();
 		User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
-		Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+		Post post = postRepository.findByIdWithUser(postId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
 
 		if(postReportRepository.existsByPostAndUser(post, user)) {
 			throw new IllegalArgumentException("이미 신고한 게시글입니다.");

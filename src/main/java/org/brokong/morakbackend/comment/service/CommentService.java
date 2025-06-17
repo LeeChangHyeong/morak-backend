@@ -12,6 +12,7 @@ import org.brokong.morakbackend.comment.dto.CommentRequestDto;
 import org.brokong.morakbackend.comment.dto.CommentResponseDto;
 import org.brokong.morakbackend.comment.dto.CommentUpdateRequestDto;
 import org.brokong.morakbackend.comment.entity.Comment;
+import org.brokong.morakbackend.comment.query.CommentQueryRepository;
 import org.brokong.morakbackend.comment.repository.CommentRepository;
 import org.brokong.morakbackend.global.Security.SecurityUtil;
 import org.brokong.morakbackend.like.Repository.CommentLikeRepository;
@@ -20,8 +21,12 @@ import org.brokong.morakbackend.post.entity.Post;
 import org.brokong.morakbackend.post.repository.PostRepository;
 import org.brokong.morakbackend.user.entity.User;
 import org.brokong.morakbackend.user.repository.UserRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +36,7 @@ public class CommentService {
 	private final UserRepository userRepository;
 	private final PostRepository postRepository;
 	private final CommentLikeRepository commentLikeRepository;
+	private final CommentQueryRepository commentQueryRepository;
 
 	@Transactional
 	public CommentResponseDto createComment(CommentRequestDto request) {
@@ -63,9 +69,7 @@ public class CommentService {
 
 		commentRepository.save(comment);
 
-		boolean likedByLoginUser = commentLikeRepository.existsByCommentAndUser(comment, user);
-
-		return CommentResponseDto.from(comment, likedByLoginUser);
+		return CommentResponseDto.from(comment, false, false);
 	}
 
 	@Transactional
@@ -88,59 +92,6 @@ public class CommentService {
 
 		commentRepository.save(comment);
 	}
-
-	public List<CommentResponseDto> getCommentsByPostId(Long postId) {
-		String email = SecurityUtil.getLoginEmail();
-
-		User user = userRepository.findByEmail(email).orElseThrow(
-			() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다.")
-		);
-
-		Post post = postRepository.findById(postId).orElseThrow(
-			() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다.")
-		);
-
-		// 댓글 + 작성자 + 부모 댓글까지 모두 fetch join으로 가져오기
-		List<Comment> comments = commentRepository.findAllByPostWithUserAndParent(post);
-
-		// 댓글 ID 목록 추출
-		List<Long> commentIds = comments.stream()
-										.map(Comment::getId)
-										.collect(Collectors.toList());
-
-		// 로그인 유저가 좋아요 누른 댓글 ID 목록 조회 (쿼리 1회)
-		List<CommentLike> likes = commentLikeRepository.findAllByCommentIdInAndUser(commentIds, user);
-		Set<Long> likedCommentIds = likes.stream()
-										 .map(like -> like.getComment().getId())
-										 .collect(Collectors.toSet());
-
-		// 댓글을 DTO로 변환
-		Map<Long, CommentResponseDto> dtoMap = new HashMap<>();
-		for (Comment comment : comments) {
-			boolean likedByLoginUser = likedCommentIds.contains(comment.getId());
-			dtoMap.put(comment.getId(), CommentResponseDto.from(comment, likedByLoginUser));
-		}
-
-		// 댓글 - 대댓글 계층 구성
-		List<CommentResponseDto> result = new ArrayList<>();
-		for (Comment comment : comments) {
-			Long parentId = comment.getParentComment() != null
-							? comment.getParentComment().getId()
-							: null;
-
-			if (parentId == null) {
-				result.add(dtoMap.get(comment.getId())); // 최상위 댓글
-			} else {
-				CommentResponseDto parentDto = dtoMap.get(parentId);
-				if (parentDto != null) {
-					parentDto.getChildren().add(dtoMap.get(comment.getId())); // 대댓글 추가
-				}
-			}
-		}
-
-		return result;
-	}
-
 
 	@Transactional
 	public CommentResponseDto updateComment(Long commentId, CommentUpdateRequestDto request) {
@@ -168,7 +119,7 @@ public class CommentService {
 
 		boolean likedByLoginUser = commentLikeRepository.existsByCommentAndUser(comment, user);
 
-		return CommentResponseDto.from(comment, likedByLoginUser);
+		return CommentResponseDto.from(comment, likedByLoginUser, commentRepository.existsByParentComment(comment));
 	}
 
 	@Transactional
@@ -206,5 +157,36 @@ public class CommentService {
 
 			return true;
 		}
+	}
+
+	public Page<CommentResponseDto> getRootComments(Long postId, int page, int size, String sortBy) {
+		Pageable pageable = PageRequest.of(page, size);
+		Page<Comment> rootComments = commentQueryRepository.findRootCommentsByPostWithSorting(postId, pageable, sortBy);
+
+		Optional<String> optionalEmail = SecurityUtil.getOptionalLoginEmail();
+
+		if(optionalEmail.isEmpty()) {
+			// 비로그인시 모든 댓글 likedByLoginUser = false
+			return rootComments.map(comment -> CommentResponseDto.from(comment, false, commentRepository.existsByParentComment(comment)));
+		}
+
+		// 로그인 유저면
+		String email = optionalEmail.get();
+		User user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+		// 댓글 ID 추출
+		List<Long> commentIds = rootComments.getContent().stream()
+			.map(Comment::getId)
+			.toList();
+
+		// 로그인 유저가 좋아요 누른 댓글 ID 추출
+		Set<Long> likedCommentIds = commentLikeRepository.findAllByCommentIdInAndUser(commentIds, user)
+														 .stream()
+														 .map(like -> like.getComment().getId())
+														 .collect(Collectors.toSet());
+
+		return rootComments.map(comment ->
+									CommentResponseDto.from(comment, likedCommentIds.contains(comment.getId()), commentRepository.existsByParentComment(comment)));
 	}
 }

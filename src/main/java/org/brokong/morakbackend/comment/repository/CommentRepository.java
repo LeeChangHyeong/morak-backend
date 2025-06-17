@@ -2,6 +2,7 @@ package org.brokong.morakbackend.comment.repository;
 
 import io.lettuce.core.dynamic.annotation.Param;
 import java.util.List;
+import java.util.Set;
 import org.brokong.morakbackend.comment.entity.Comment;
 import org.brokong.morakbackend.post.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,4 +21,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 		    ORDER BY c.createdAt
 		""")
 	List<Comment> findAllByPostWithUserAndParent(@Param("post") Post post);
+
+	boolean existsByParentComment(Comment parentComment);
 }

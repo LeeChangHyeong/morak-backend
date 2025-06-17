@@ -7,6 +7,7 @@ import org.brokong.morakbackend.comment.dto.CommentResponseDto;
 import org.brokong.morakbackend.comment.dto.CommentUpdateRequestDto;
 import org.brokong.morakbackend.comment.service.CommentService;
 import org.brokong.morakbackend.global.response.ResponseDto;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -39,13 +40,6 @@ public class CommentController {
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("댓글 삭제 성공", null));
 	}
 
-	@GetMapping
-	public ResponseEntity<ResponseDto<List<CommentResponseDto>>> getComments(@RequestParam Long postId) {
-		List<CommentResponseDto> comments = commentService.getCommentsByPostId(postId);
-
-		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("댓글 조회 성공", comments));
-	}
-
 	@PostMapping("/{commentId}")
 	public ResponseEntity<ResponseDto<CommentResponseDto>> updateComment(@PathVariable Long commentId, @RequestBody CommentUpdateRequestDto request) {
 		CommentResponseDto responseDto = commentService.updateComment(commentId, request);
@@ -58,6 +52,18 @@ public class CommentController {
 		boolean liked = commentService.likeComment(commentId);
 
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("댓글 좋아요 상태 변경", liked));
+	}
+
+	@GetMapping("/root")
+	public ResponseEntity<ResponseDto<Page<CommentResponseDto>>> getRootComments(
+		@RequestParam Long postId,
+		@RequestParam(defaultValue = "1") int page,
+		@RequestParam(defaultValue = "10") int size,
+		@RequestParam(defaultValue = "createdAt") String sortBy
+	) {
+		Page<CommentResponseDto> comments = commentService.getRootComments(postId, page-1, size, sortBy);
+
+		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("루트 댓글 조회 성공", comments));
 	}
 
 }

@@ -19,9 +19,9 @@ public class CommentResponseDto {
 	private boolean likedByLoginUser; // 로그인 유저가 좋아요 눌렀는지
 	private String createdAt;
 	private String modifiedAt;
-	private List<CommentResponseDto> children = new ArrayList<>();
+	boolean hasChildren;
 
-	public static CommentResponseDto from(Comment comment, boolean likedByLoginUser){
+	public static CommentResponseDto from(Comment comment, boolean likedByLoginUser, boolean hasChildren){
 		CommentResponseDto dto = new CommentResponseDto();
 		dto.id = comment.getId();
 		dto.content = comment.getContent();
@@ -34,6 +34,7 @@ public class CommentResponseDto {
 		dto.likedByLoginUser = likedByLoginUser;
 		dto.createdAt = comment.getCreatedAt().toString();
 		dto.modifiedAt = comment.getModifiedAt().toString();
+		dto.hasChildren = hasChildren;
 		// children은 나중에 재귀적으로 세팅
 		return dto;
 	}
