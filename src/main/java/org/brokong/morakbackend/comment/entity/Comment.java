@@ -23,7 +23,7 @@ import org.brokong.morakbackend.user.entity.User;
 
 @Getter
 @RequiredArgsConstructor
-@Entity(name = "comments")
+@Entity
 @Table(indexes = {
     @Index(name = "idx_parent_comment_id", columnList = "parent_comment_id")
 })

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 public interface PostRepository extends JpaRepository<Post, Long> {
 
 	@Query("""
-    SELECT p FROM posts p
+    SELECT p FROM Post p
     JOIN FETCH p.user
     WHERE p.id = :id
 """)

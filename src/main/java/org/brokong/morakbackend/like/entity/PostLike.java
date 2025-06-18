@@ -16,7 +16,7 @@ import org.brokong.morakbackend.post.entity.Post;
 import org.brokong.morakbackend.user.entity.User;
 
 @NoArgsConstructor
-@Entity(name = "post_likes")
+@Entity
 public class PostLike extends BaseEntity {
 
     @Id

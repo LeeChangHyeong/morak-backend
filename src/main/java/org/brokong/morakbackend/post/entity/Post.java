@@ -13,7 +13,7 @@ import java.util.List;
 
 @Getter
 @NoArgsConstructor
-@Entity(name = "posts")
+@Entity
 public class Post extends BaseEntity {
 
     @Id

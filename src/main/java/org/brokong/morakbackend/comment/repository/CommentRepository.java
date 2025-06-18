@@ -14,7 +14,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
 	@Query("""
 		    SELECT c
-		    FROM comments c
+		    FROM Comment c
 		    JOIN FETCH c.user
 		    LEFT JOIN FETCH c.parentComment
 		    WHERE c.post = :post

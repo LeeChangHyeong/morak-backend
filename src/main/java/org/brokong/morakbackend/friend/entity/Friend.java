@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import org.brokong.morakbackend.global.entity.BaseEntity;
 import org.brokong.morakbackend.user.entity.User;
 
-@Entity(name = "friends")
+@Entity
 public class Friend extends BaseEntity {
 
     @Id

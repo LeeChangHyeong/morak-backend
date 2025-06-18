@@ -10,7 +10,7 @@ import org.brokong.morakbackend.post.entity.Post;
 @Getter
 @NoArgsConstructor
 @SuperBuilder
-@Entity(name = "post_reports")
+@Entity
 public class PostReport extends Report{
 
 	@Id
