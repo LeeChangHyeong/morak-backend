@@ -66,7 +66,7 @@ public class CommentController {
 		@RequestParam Long postId,
 		@RequestParam(defaultValue = "1") int page,
 		@RequestParam(defaultValue = "10") int size,
-		@RequestParam(defaultValue = "createdAt") String sortBy
+		@RequestParam(defaultValue = "createdAtAsc") String sortBy
 	) {
 		Page<CommentResponseDto> comments = commentService.getRootComments(postId, page-1, size, sortBy);
 
