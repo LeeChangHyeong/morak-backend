@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.Security.UserPrincipal;
 import org.brokong.morakbackend.global.enums.SortType;
 import org.brokong.morakbackend.global.response.ResponseDto;
+import org.brokong.morakbackend.post.dto.PostRequestDto;
 import org.brokong.morakbackend.report.dto.PostReportRequestDto;
 import org.brokong.morakbackend.post.dto.PostResponseDto;
 import org.brokong.morakbackend.post.service.PostService;
@@ -23,7 +24,7 @@ public class PostController {
 
 	@PostMapping
 	public ResponseEntity<ResponseDto<PostResponseDto>> createPost(
-		@RequestBody PostReportRequestDto requestDto,
+		@RequestBody PostRequestDto requestDto,
 		@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
 		PostResponseDto responseDto = postService.createPost(requestDto.getContent(), userPrincipal);
@@ -71,7 +72,7 @@ public class PostController {
 	@PutMapping("/{postId}")
 	public ResponseEntity<ResponseDto<PostResponseDto>> updatePost(
 		@PathVariable Long postId,
-		@RequestBody PostReportRequestDto requestDto,
+		@RequestBody PostRequestDto requestDto,
 		@AuthenticationPrincipal UserPrincipal userPrincipal
 	) {
 		PostResponseDto responseDto = postService.updatePost(postId, requestDto.getContent(), userPrincipal);
