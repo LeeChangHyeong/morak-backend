@@ -4,6 +4,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 
+import org.brokong.morakbackend.global.enums.SortType;
 import org.brokong.morakbackend.post.entity.Post;
 import org.brokong.morakbackend.post.entity.QPost;
 import org.brokong.morakbackend.user.entity.QUser;
@@ -20,7 +21,7 @@ public class PostQueryRepository {
 
 	private final JPAQueryFactory jpaQueryFactory;
 
-	public Page<Post> findAllWithSorting(Pageable pageable, String sortBy) {
+	public Page<Post> findAllWithSorting(Pageable pageable, SortType sortBy) {
 		QPost post = QPost.post;
 
 		JPAQuery<Post> query = jpaQueryFactory
@@ -29,12 +30,12 @@ public class PostQueryRepository {
 
 		// 동적 정렬 처리
 		switch (sortBy) {
-			case "likeCount":
-				// likeCount로 정렬 후 같으면 createdAt으로 정렬
+			case LIKE_COUNT:
+				// likeCount로 정렬 후 같으면 createdAtDesc으로 정렬
 				query.orderBy(post.likeCount.desc(), post.createdAt.desc());
 				break;
-			case "viewCount":
-				// viewCount로 정렬 후 같으면 createdAt으로 정렬
+			case VIEW_COUNT:
+				// viewCount로 정렬 후 같으면 createdAtDesc으로 정렬
 				query.orderBy(post.viewCount.desc(), post.createdAt.desc());
 				break;
 			default:
@@ -56,7 +57,7 @@ public class PostQueryRepository {
 		return new PageImpl<>(posts, pageable, total != null ? total : 0L);
 	}
 
-	public Page<Post> findAllByUserWithSorting(Pageable pageable, String sortBy, Long userId) {
+	public Page<Post> findAllByUserWithSorting(Pageable pageable, SortType sortBy, Long userId) {
 		QPost post = QPost.post;
 		QUser user = QUser.user;
 
@@ -67,11 +68,11 @@ public class PostQueryRepository {
 
 		// 동적 정렬 처리
 		switch (sortBy) {
-			case "likeCount":
+			case LIKE_COUNT:
 				// likeCount로 정렬 후 같으면 createdAt으로 정렬
 				query.orderBy(post.likeCount.desc(), post.createdAt.desc());
 				break;
-			case "viewCount":
+			case VIEW_COUNT:
 				// viewCount로 정렬 후 같으면 createdAt으로 정렬
 				query.orderBy(post.viewCount.desc(), post.createdAt.desc());
 				break;

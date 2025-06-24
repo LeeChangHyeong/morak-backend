@@ -6,6 +6,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.comment.entity.Comment;
 import org.brokong.morakbackend.comment.entity.QComment;
+import org.brokong.morakbackend.global.enums.SortType;
 import org.brokong.morakbackend.user.entity.QUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -18,7 +19,7 @@ public class CommentQueryRepository {
 
 	private final JPAQueryFactory jpaQueryFactory;
 
-	public Page<Comment> findRootCommentsByPostWithSorting(Long postId, Pageable pageable, String sortBy) {
+	public Page<Comment> findRootCommentsByPostWithSorting(Long postId, Pageable pageable, SortType sortBy) {
 		QComment comment = QComment.comment;
 		QUser user = QUser.user;
 
@@ -31,10 +32,10 @@ public class CommentQueryRepository {
 			);
 
 		switch (sortBy) {
-			case "likeCount":
+			case LIKE_COUNT:
 				query.orderBy(comment.likeCount.desc(), comment.createdAt.asc());
 				break;
-			case "createdAt": // 최신순
+			case CREATED_AT_DESC: // 최신순
 				query.orderBy(comment.createdAt.desc());
 				break;
 			default:

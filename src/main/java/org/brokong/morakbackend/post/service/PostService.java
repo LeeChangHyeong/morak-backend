@@ -3,6 +3,7 @@ package org.brokong.morakbackend.post.service;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.Security.SecurityUtil;
+import org.brokong.morakbackend.global.enums.SortType;
 import org.brokong.morakbackend.like.Repository.PostLikeRepository;
 import org.brokong.morakbackend.like.entity.PostLike;
 import org.brokong.morakbackend.post.dto.PostResponseDto;
@@ -70,7 +71,7 @@ public class PostService {
 		return PostResponseDto.from(post);
 	}
 
-	public Page<PostResponseDto> getPostList(int page, int size, String sortBy) {
+	public Page<PostResponseDto> getPostList(int page, int size, SortType sortBy) {
 		Pageable pageable = PageRequest.of(page, size);
 
 		Page<Post> posts = postQueryRepository.findAllWithSorting(pageable, sortBy);
@@ -130,7 +131,7 @@ public class PostService {
 		return PostResponseDto.from(post);
 	}
 
-	public Page<PostResponseDto> getMyPostList(int page, int size, String sortBy) {
+	public Page<PostResponseDto> getMyPostList(int page, int size, SortType sortBy) {
 		String email = SecurityUtil.getLoginEmail();
 		User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 		Pageable pageable = PageRequest.of(page, size);

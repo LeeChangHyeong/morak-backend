@@ -1,6 +1,7 @@
 package org.brokong.morakbackend.post.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.brokong.morakbackend.global.enums.SortType;
 import org.brokong.morakbackend.global.response.ResponseDto;
 import org.brokong.morakbackend.report.dto.PostReportRequestDto;
 import org.brokong.morakbackend.post.dto.PostResponseDto;
@@ -41,12 +42,11 @@ public class PostController {
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("게시글이 성공적으로 조회되었습니다.", responseDto));
 	}
 
-	// createdAt, likeCount, viewCount 가능
 	@GetMapping
 	public ResponseEntity<ResponseDto<Page<PostResponseDto>>> getPosts(
 		@RequestParam(defaultValue = "1") int page,
 		@RequestParam(defaultValue = "10") int size,
-		@RequestParam(defaultValue = "createdAt") String sortBy) {
+		@RequestParam(defaultValue = "CREATED_AT_DESC") SortType sortBy) {
 
 		Page<PostResponseDto> posts = postService.getPostList(page - 1, size, sortBy);
 		return ResponseEntity.ok(new ResponseDto<>("게시글 목록 조회 성공", posts));
@@ -73,7 +73,7 @@ public class PostController {
 	public ResponseEntity<ResponseDto<Page<PostResponseDto>>> getMyPosts(
 		@RequestParam(defaultValue = "1") int page,
 		@RequestParam(defaultValue = "10") int size,
-		@RequestParam(defaultValue = "createdAt") String sortBy) {
+		@RequestParam(defaultValue = "CREATED_AT_DESC") SortType sortBy) {
 
 		Page<PostResponseDto> posts = postService.getMyPostList(page - 1, size, sortBy);
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("내 게시글 목록 조회 성공", posts));

@@ -15,6 +15,7 @@ import org.brokong.morakbackend.comment.entity.Comment;
 import org.brokong.morakbackend.comment.query.CommentQueryRepository;
 import org.brokong.morakbackend.comment.repository.CommentRepository;
 import org.brokong.morakbackend.global.Security.SecurityUtil;
+import org.brokong.morakbackend.global.enums.SortType;
 import org.brokong.morakbackend.like.Repository.CommentLikeRepository;
 import org.brokong.morakbackend.like.entity.CommentLike;
 import org.brokong.morakbackend.post.entity.Post;
@@ -159,7 +160,7 @@ public class CommentService {
 		}
 	}
 
-	public Page<CommentResponseDto> getRootComments(Long postId, int page, int size, String sortBy) {
+	public Page<CommentResponseDto> getRootComments(Long postId, int page, int size, SortType sortBy) {
 		Pageable pageable = PageRequest.of(page, size);
 		Page<Comment> rootComments = commentQueryRepository.findRootCommentsByPostWithSorting(postId, pageable, sortBy);
 

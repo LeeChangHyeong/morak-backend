@@ -1,11 +1,11 @@
 package org.brokong.morakbackend.comment.controller;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.comment.dto.CommentRequestDto;
 import org.brokong.morakbackend.comment.dto.CommentResponseDto;
 import org.brokong.morakbackend.comment.dto.CommentUpdateRequestDto;
 import org.brokong.morakbackend.comment.service.CommentService;
+import org.brokong.morakbackend.global.enums.SortType;
 import org.brokong.morakbackend.global.response.ResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,7 +48,7 @@ public class CommentController {
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("댓글 삭제 성공", null));
 	}
 
-	@PostMapping("/{commentId}")
+	@PutMapping("/{commentId}")
 	public ResponseEntity<ResponseDto<CommentResponseDto>> updateComment(@PathVariable Long commentId, @RequestBody CommentUpdateRequestDto request) {
 		CommentResponseDto responseDto = commentService.updateComment(commentId, request);
 
@@ -66,7 +67,7 @@ public class CommentController {
 		@RequestParam Long postId,
 		@RequestParam(defaultValue = "1") int page,
 		@RequestParam(defaultValue = "10") int size,
-		@RequestParam(defaultValue = "createdAtAsc") String sortBy
+		@RequestParam(defaultValue = "CREATED_AT_ASC") SortType sortBy // 기본이 오래된 순 정렬
 	) {
 		Page<CommentResponseDto> comments = commentService.getRootComments(postId, page-1, size, sortBy);
 
