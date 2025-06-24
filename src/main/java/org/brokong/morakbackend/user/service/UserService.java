@@ -1,7 +1,7 @@
 package org.brokong.morakbackend.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.brokong.morakbackend.global.Security.SecurityUtil;
+import org.brokong.morakbackend.global.Security.UserPrincipal;
 import org.brokong.morakbackend.user.dto.response.UserResponseDto;
 import org.brokong.morakbackend.user.entity.User;
 import org.brokong.morakbackend.user.repository.UserRepository;
@@ -16,15 +16,13 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public UserResponseDto getMyInfo() {
+	public UserResponseDto getMyInfo(UserPrincipal userPrincipal) {
 
-        String email = SecurityUtil.getLoginEmail();
-
-        if (email == null) {
+		if (userPrincipal == null) {
             throw new RuntimeException("인증 정보가 없습니다.");
         }
 
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("가입되지 않은 이메일입니다."));
+		User user = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(() -> new IllegalArgumentException("가입되지 않은 이메일입니다."));
 
         return UserResponseDto.from(user);
     }
@@ -70,10 +68,9 @@ public class UserService {
         userRepository.save(user);
 	}
 
-    public void withdrawal() {
-        String email = SecurityUtil.getLoginEmail();
+	public void withdrawal(UserPrincipal userPrincipal) {
 
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+		User user = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
         user.withdraw();
 
         userRepository.save(user);

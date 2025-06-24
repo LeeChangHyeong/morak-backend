@@ -14,7 +14,7 @@ import org.brokong.morakbackend.comment.dto.CommentUpdateRequestDto;
 import org.brokong.morakbackend.comment.entity.Comment;
 import org.brokong.morakbackend.comment.query.CommentQueryRepository;
 import org.brokong.morakbackend.comment.repository.CommentRepository;
-import org.brokong.morakbackend.global.Security.SecurityUtil;
+import org.brokong.morakbackend.global.Security.UserPrincipal;
 import org.brokong.morakbackend.global.enums.SortType;
 import org.brokong.morakbackend.like.Repository.CommentLikeRepository;
 import org.brokong.morakbackend.like.entity.CommentLike;
@@ -40,10 +40,9 @@ public class CommentService {
 	private final CommentQueryRepository commentQueryRepository;
 
 	@Transactional
-	public CommentResponseDto createComment(CommentRequestDto request) {
+	public CommentResponseDto createComment(CommentRequestDto request, UserPrincipal userPrincipal) {
 
-		String email = SecurityUtil.getLoginEmail();
-		User user = userRepository.findByEmail(email).orElseThrow(
+		User user = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(
 			() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다.")
 		);
 		Post post = postRepository.findById(request.getPostId()).orElseThrow(
@@ -74,8 +73,7 @@ public class CommentService {
 	}
 
 	@Transactional
-	public void deleteComment(Long commentId) {
-		String email = SecurityUtil.getLoginEmail();
+	public void deleteComment(Long commentId, UserPrincipal userPrincipal) {
 
 		Comment comment = commentRepository.findById(commentId).orElseThrow(
 			() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다.")
@@ -85,7 +83,7 @@ public class CommentService {
 			throw new IllegalArgumentException("이미 삭제된 댓글입니다.");
 		}
 
-		if (!comment.getUser().getEmail().equals(email)) {
+		if (!comment.getUser().getEmail().equals(userPrincipal.getEmail())) {
 			throw new IllegalArgumentException("본인이 작성한 댓글만 삭제할 수 있습니다.");
 		}
 
@@ -95,11 +93,9 @@ public class CommentService {
 	}
 
 	@Transactional
-	public CommentResponseDto updateComment(Long commentId, CommentUpdateRequestDto request) {
+	public CommentResponseDto updateComment(Long commentId, CommentUpdateRequestDto request, UserPrincipal userPrincipal) {
 
-		String email = SecurityUtil.getLoginEmail();
-
-		User user = userRepository.findByEmail(email).orElseThrow(
+		User user = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(
 			() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다.")
 		);
 
@@ -111,7 +107,7 @@ public class CommentService {
 			throw new IllegalArgumentException("삭제된 댓글은 수정이 불가능합니다.");
 		}
 
-		if (!comment.getUser().getEmail().equals(email)) {
+		if (!comment.getUser().getEmail().equals(userPrincipal.getEmail())) {
 			throw new IllegalArgumentException("본인이 작성한 댓글만 수정이 가능합니다.");
 		}
 
@@ -124,10 +120,9 @@ public class CommentService {
 	}
 
 	@Transactional
-	public boolean likeComment(Long commentId) {
-		String email = SecurityUtil.getLoginEmail();
+	public boolean likeComment(Long commentId, UserPrincipal userPrincipal) {
 
-		User user = userRepository.findByEmail(email).orElseThrow(
+		User user = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(
 			() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다.")
 		);
 
@@ -160,20 +155,17 @@ public class CommentService {
 		}
 	}
 
-	public Page<CommentResponseDto> getRootComments(Long postId, int page, int size, SortType sortBy) {
+	public Page<CommentResponseDto> getRootComments(Long postId, int page, int size, SortType sortBy, UserPrincipal userPrincipal) {
 		Pageable pageable = PageRequest.of(page, size);
 		Page<Comment> rootComments = commentQueryRepository.findRootCommentsByPostWithSorting(postId, pageable, sortBy);
 
-		Optional<String> optionalEmail = SecurityUtil.getOptionalLoginEmail();
-
-		if(optionalEmail.isEmpty()) {
+		if (userPrincipal == null) {
 			// 비로그인시 모든 댓글 likedByLoginUser = false
 			return rootComments.map(comment -> CommentResponseDto.from(comment, false, commentRepository.existsByParentComment(comment)));
 		}
 
 		// 로그인 유저면
-		String email = optionalEmail.get();
-		User user = userRepository.findByEmail(email)
+		User user = userRepository.findByEmail(userPrincipal.getEmail())
 			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
 		// 댓글 ID 추출
@@ -191,22 +183,18 @@ public class CommentService {
 									CommentResponseDto.from(comment, likedCommentIds.contains(comment.getId()), commentRepository.existsByParentComment(comment)));
 	}
 
-	public Page<CommentResponseDto> getReplies(Long parentId, int page, int size) {
+	public Page<CommentResponseDto> getReplies(Long parentId, int page, int size, UserPrincipal userPrincipal) {
 		Pageable pageable = PageRequest.of(page, size);
 
 		Page<Comment> replies = commentQueryRepository.findRepliesByParentComment(parentId, pageable);
 
-		Optional<String> optionalEmail = SecurityUtil.getOptionalLoginEmail();
-
-		if(optionalEmail.isEmpty()) {
+		if (userPrincipal == null) {
 			// 비로그인시 모든 댓글 likedByLoginUser = false
 			return replies.map(comment -> CommentResponseDto.from(comment, false, false));
 		}
 
 		// 로그인 유저면
-		String email = optionalEmail.get();
-
-		User user = userRepository.findByEmail(email)
+		User user = userRepository.findByEmail(userPrincipal.getEmail())
 								  .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
 		// 댓글 ID 추출
@@ -225,20 +213,17 @@ public class CommentService {
 									CommentResponseDto.from(comment, likedCommentIds.contains(comment.getId()), commentRepository.existsByParentComment(comment)));
 	}
 
-	public CommentResponseDto getCommentById(Long commentId) {
-		Optional<String> optionalEmail = SecurityUtil.getOptionalLoginEmail();
+	public CommentResponseDto getCommentById(Long commentId, UserPrincipal userPrincipal) {
 
 		Comment comment = commentRepository.findById(commentId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
 
-		if(optionalEmail.isEmpty()) {
+		if (userPrincipal == null) {
 			// 비로그인시 모든 댓글 likedByLoginUser = false
 			return CommentResponseDto.from(comment, false, false);
 		}
 
 		// 로그인 유저면
-		String email = optionalEmail.get();
-
-		User user = userRepository.findByEmail(email)
+		User user = userRepository.findByEmail(userPrincipal.getEmail())
 								  .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
 		// 댓글 ID 추출

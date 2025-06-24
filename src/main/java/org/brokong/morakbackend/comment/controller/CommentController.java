@@ -5,11 +5,13 @@ import org.brokong.morakbackend.comment.dto.CommentRequestDto;
 import org.brokong.morakbackend.comment.dto.CommentResponseDto;
 import org.brokong.morakbackend.comment.dto.CommentUpdateRequestDto;
 import org.brokong.morakbackend.comment.service.CommentService;
+import org.brokong.morakbackend.global.Security.UserPrincipal;
 import org.brokong.morakbackend.global.enums.SortType;
 import org.brokong.morakbackend.global.response.ResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,36 +30,52 @@ public class CommentController {
 	private final CommentService commentService;
 
 	@PostMapping
-	public ResponseEntity<ResponseDto<CommentResponseDto>> createComment(@RequestBody CommentRequestDto request) {
-		CommentResponseDto responseDto = commentService.createComment(request);
+	public ResponseEntity<ResponseDto<CommentResponseDto>> createComment(
+		@RequestBody CommentRequestDto request,
+		@AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+		CommentResponseDto responseDto = commentService.createComment(request, userPrincipal);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDto<>("댓글 작성 성공", responseDto));
 	}
 
 	@GetMapping("/{commentId}")
-	public ResponseEntity<ResponseDto<CommentResponseDto>> getCommentById(@PathVariable Long commentId) {
-		CommentResponseDto comment = commentService.getCommentById(commentId);
+	public ResponseEntity<ResponseDto<CommentResponseDto>> getCommentById(
+		@PathVariable Long commentId,
+		@AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+		CommentResponseDto comment = commentService.getCommentById(commentId, userPrincipal);
 		return ResponseEntity.ok(new ResponseDto<>("댓글 조회 성공", comment));
 	}
 
 
 	@DeleteMapping("/{commentId}")
-	public ResponseEntity<ResponseDto<Void>> deleteComment(@PathVariable Long commentId) {
-		commentService.deleteComment(commentId);
+	public ResponseEntity<ResponseDto<Void>> deleteComment(
+		@PathVariable Long commentId,
+		@AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+		commentService.deleteComment(commentId, userPrincipal);
 
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("댓글 삭제 성공", null));
 	}
 
 	@PutMapping("/{commentId}")
-	public ResponseEntity<ResponseDto<CommentResponseDto>> updateComment(@PathVariable Long commentId, @RequestBody CommentUpdateRequestDto request) {
-		CommentResponseDto responseDto = commentService.updateComment(commentId, request);
+	public ResponseEntity<ResponseDto<CommentResponseDto>> updateComment(
+		@PathVariable Long commentId,
+		@RequestBody CommentUpdateRequestDto request,
+		@AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+		CommentResponseDto responseDto = commentService.updateComment(commentId, request, userPrincipal);
 
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("댓글 수정 성공", responseDto));
 	}
 
 	@PostMapping("/{commentId}/like")
-	public ResponseEntity<ResponseDto<Boolean>> likeComment(@PathVariable Long commentId) {
-		boolean liked = commentService.likeComment(commentId);
+	public ResponseEntity<ResponseDto<Boolean>> likeComment(
+		@PathVariable Long commentId,
+		@AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+		boolean liked = commentService.likeComment(commentId, userPrincipal);
 
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("댓글 좋아요 상태 변경", liked));
 	}
@@ -67,9 +85,10 @@ public class CommentController {
 		@RequestParam Long postId,
 		@RequestParam(defaultValue = "1") int page,
 		@RequestParam(defaultValue = "10") int size,
-		@RequestParam(defaultValue = "CREATED_AT_ASC") SortType sortBy // 기본이 오래된 순 정렬
+		@RequestParam(defaultValue = "CREATED_AT_ASC") SortType sortBy,
+		@AuthenticationPrincipal UserPrincipal userPrincipal
 	) {
-		Page<CommentResponseDto> comments = commentService.getRootComments(postId, page-1, size, sortBy);
+		Page<CommentResponseDto> comments = commentService.getRootComments(postId, page - 1, size, sortBy, userPrincipal);
 
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("루트 댓글 조회 성공", comments));
 	}
@@ -78,9 +97,10 @@ public class CommentController {
 	public ResponseEntity<ResponseDto<Page<CommentResponseDto>>> getReplies(
 		@PathVariable Long parentId,
 		@RequestParam(defaultValue = "1") int page,
-		@RequestParam(defaultValue = "10") int size
+		@RequestParam(defaultValue = "10") int size,
+		@AuthenticationPrincipal UserPrincipal userPrincipal
 	) {
-		Page<CommentResponseDto> replies = commentService.getReplies(parentId, page-1, size);
+		Page<CommentResponseDto> replies = commentService.getReplies(parentId, page - 1, size, userPrincipal);
 
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("대댓글 조회 성공", replies));
 	}

@@ -2,7 +2,7 @@ package org.brokong.morakbackend.post.service;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.brokong.morakbackend.global.Security.SecurityUtil;
+import org.brokong.morakbackend.global.Security.UserPrincipal;
 import org.brokong.morakbackend.global.enums.SortType;
 import org.brokong.morakbackend.like.Repository.PostLikeRepository;
 import org.brokong.morakbackend.like.entity.PostLike;
@@ -32,11 +32,9 @@ public class PostService {
 	private final PostReportRepository postReportRepository;
 
 	@Transactional
-	public PostResponseDto createPost(String content) {
+	public PostResponseDto createPost(String content, UserPrincipal userPrincipal) {
 
-		String email = SecurityUtil.getLoginEmail();
-
-		User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+		User user = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
 		Post post = Post.builder()
 						.user(user)
@@ -49,11 +47,9 @@ public class PostService {
 	}
 
 	@Transactional
-	public void deletePost(Long postId) {
+	public void deletePost(Long postId, UserPrincipal userPrincipal) {
 
-		String email = SecurityUtil.getLoginEmail();
-
-		User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+		User user = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
 		Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
 
@@ -80,10 +76,9 @@ public class PostService {
 	}
 
 	@Transactional
-	public boolean likePost(Long postId) {
-		String email = SecurityUtil.getLoginEmail();
+	public boolean likePost(Long postId, UserPrincipal userPrincipal) {
 
-		User user = userRepository.findByEmail(email).orElseThrow(
+		User user = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(
 			() -> new IllegalArgumentException("해당 유저가 존재하지 않습니다.")
 		);
 
@@ -113,13 +108,11 @@ public class PostService {
 	}
 
 	@Transactional
-	public PostResponseDto updatePost(Long postId, String content) {
+	public PostResponseDto updatePost(Long postId, String content, UserPrincipal userPrincipal) {
 
 		Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
 
-		String email = SecurityUtil.getLoginEmail();
-
-		User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+		User user = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
 		if (!post.getUser().equals(user)) {
 			throw new IllegalArgumentException("작성자만 수정할 수 있습니다.");
@@ -131,9 +124,8 @@ public class PostService {
 		return PostResponseDto.from(post);
 	}
 
-	public Page<PostResponseDto> getMyPostList(int page, int size, SortType sortBy) {
-		String email = SecurityUtil.getLoginEmail();
-		User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+	public Page<PostResponseDto> getMyPostList(int page, int size, SortType sortBy, UserPrincipal userPrincipal) {
+		User user = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 		Pageable pageable = PageRequest.of(page, size);
 
 		Page<Post> posts = postQueryRepository.findAllByUserWithSorting(pageable, sortBy, user.getId());
@@ -142,10 +134,9 @@ public class PostService {
 	}
 
 	@Transactional
-	public void reportPost(Long postId, PostReportRequestDto requestDto) {
+	public void reportPost(Long postId, PostReportRequestDto requestDto, UserPrincipal userPrincipal) {
 
-		String email = SecurityUtil.getLoginEmail();
-		User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+		User user = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 		Post post = postRepository.findByIdWithUser(postId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
 
 		if(postReportRepository.existsByPostAndUser(post, user)) {

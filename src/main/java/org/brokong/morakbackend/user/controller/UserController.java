@@ -2,12 +2,14 @@ package org.brokong.morakbackend.user.controller;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.brokong.morakbackend.global.Security.UserPrincipal;
 import org.brokong.morakbackend.global.response.ResponseDto;
 import org.brokong.morakbackend.user.dto.response.UserResponseDto;
 import org.brokong.morakbackend.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,8 +25,8 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<ResponseDto<UserResponseDto>> getMyInfo() {
-        UserResponseDto myInfo = userService.getMyInfo();
+	public ResponseEntity<ResponseDto<UserResponseDto>> getMyInfo(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+		UserResponseDto myInfo = userService.getMyInfo(userPrincipal);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("본인 정보 조회 성공", myInfo));
     }
@@ -79,9 +81,9 @@ public class UserController {
 
     // 유저 탈퇴
     @PostMapping("/withdrawal")
-    public ResponseEntity<ResponseDto<String>> withdrawal() {
+	public ResponseEntity<ResponseDto<String>> withdrawal(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-        userService.withdrawal();
+		userService.withdrawal(userPrincipal);
         ResponseDto<String> response = new ResponseDto<>("회원탈퇴 성공", "회원탈퇴 되었습니다.");
 
         return ResponseEntity.status(HttpStatus.OK).body(response);

@@ -1,6 +1,7 @@
 package org.brokong.morakbackend.post.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.brokong.morakbackend.global.Security.UserPrincipal;
 import org.brokong.morakbackend.global.enums.SortType;
 import org.brokong.morakbackend.global.response.ResponseDto;
 import org.brokong.morakbackend.report.dto.PostReportRequestDto;
@@ -10,6 +11,7 @@ import org.brokong.morakbackend.post.service.PostService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,17 +22,21 @@ public class PostController {
 	private final PostService postService;
 
 	@PostMapping
-	public ResponseEntity<ResponseDto<PostResponseDto>> createPost(@RequestBody PostReportRequestDto requestDto) {
+	public ResponseEntity<ResponseDto<PostResponseDto>> createPost(
+		@RequestBody PostReportRequestDto requestDto,
+		@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-		PostResponseDto responseDto = postService.createPost(requestDto.getContent());
+		PostResponseDto responseDto = postService.createPost(requestDto.getContent(), userPrincipal);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDto<>("게시글이 성공적으로 작성되었습니다.", responseDto));
 	}
 
 	@DeleteMapping("/{postId}")
-	public ResponseEntity<ResponseDto<Void>> deletePost(@PathVariable Long postId) {
+	public ResponseEntity<ResponseDto<Void>> deletePost(
+		@PathVariable Long postId,
+		@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-		postService.deletePost(postId);
+		postService.deletePost(postId, userPrincipal);
 
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("게시글이 성공적으로 삭제되었습니다.", null));
 	}
@@ -53,8 +59,11 @@ public class PostController {
 	}
 
 	@PostMapping("/{postId}/like")
-	public ResponseEntity<ResponseDto<Boolean>> likePost(@PathVariable Long postId) {
-		Boolean liked = postService.likePost(postId);
+	public ResponseEntity<ResponseDto<Boolean>> likePost(
+		@PathVariable Long postId,
+		@AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+		Boolean liked = postService.likePost(postId, userPrincipal);
 
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("게시글 좋아요 상태변경", liked));
 	}
@@ -62,9 +71,10 @@ public class PostController {
 	@PutMapping("/{postId}")
 	public ResponseEntity<ResponseDto<PostResponseDto>> updatePost(
 		@PathVariable Long postId,
-		@RequestBody PostReportRequestDto requestDto
+		@RequestBody PostReportRequestDto requestDto,
+		@AuthenticationPrincipal UserPrincipal userPrincipal
 	) {
-		PostResponseDto responseDto = postService.updatePost(postId, requestDto.getContent());
+		PostResponseDto responseDto = postService.updatePost(postId, requestDto.getContent(), userPrincipal);
 
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("게시글이 성공적으로 수정되었습니다.", responseDto));
 	}
@@ -73,15 +83,20 @@ public class PostController {
 	public ResponseEntity<ResponseDto<Page<PostResponseDto>>> getMyPosts(
 		@RequestParam(defaultValue = "1") int page,
 		@RequestParam(defaultValue = "10") int size,
-		@RequestParam(defaultValue = "CREATED_AT_DESC") SortType sortBy) {
+		@RequestParam(defaultValue = "CREATED_AT_DESC") SortType sortBy,
+		@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-		Page<PostResponseDto> posts = postService.getMyPostList(page - 1, size, sortBy);
+		Page<PostResponseDto> posts = postService.getMyPostList(page - 1, size, sortBy, userPrincipal);
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("내 게시글 목록 조회 성공", posts));
 	}
 
 	@PostMapping("/{postId}/report")
-	public ResponseEntity<ResponseDto<Void>> reportPost(@PathVariable Long postId, @RequestBody PostReportRequestDto requestDto) {
-		postService.reportPost(postId, requestDto);
+	public ResponseEntity<ResponseDto<Void>> reportPost(
+		@PathVariable Long postId,
+		@RequestBody PostReportRequestDto requestDto,
+		@AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+		postService.reportPost(postId, requestDto, userPrincipal);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDto<>("게시글이 성공적으로 신고되었습니다.", null));
 	}
