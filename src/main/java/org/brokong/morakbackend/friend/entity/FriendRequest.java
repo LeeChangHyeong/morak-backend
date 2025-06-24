@@ -1,11 +1,15 @@
 package org.brokong.morakbackend.friend.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.brokong.morakbackend.friend.enums.FriendRequestStatus;
 import org.brokong.morakbackend.global.entity.BaseEntity;
 import org.brokong.morakbackend.user.entity.User;
 
 @Entity
+@Getter
+@NoArgsConstructor
 public class FriendRequest extends BaseEntity {
 
 	@Id
@@ -31,4 +35,7 @@ public class FriendRequest extends BaseEntity {
 		this.friendRequeststatus = FriendRequestStatus.PENDING;
 	}
 
+	public void accept() {
+		this.friendRequeststatus = FriendRequestStatus.ACCEPTED;
+	}
 }
