@@ -64,12 +64,10 @@ public class JwtUtil {
             return true;
         } catch (ExpiredJwtException e) {
             log.warn("만료된 JWT 토큰입니다.");
-
-            return false;
+			throw new ExpiredJwtException(e.getHeader(), e.getClaims(), "만료된 JWT 토큰입니다.");
         } catch (JwtException e) {
             log.warn("JWT 토큰이 유효하지 않습니다.");
-
-            return false;
+			throw new JwtException("유효하지 않은 JWT 토큰입니다.");
         }
     }
 
