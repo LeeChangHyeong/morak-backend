@@ -24,4 +24,11 @@ public class FriendRequest extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private FriendRequestStatus friendRequeststatus;
+
+	public FriendRequest(User sender, User receiver) {
+		this.sender = sender;
+		this.receiver = receiver;
+		this.friendRequeststatus = FriendRequestStatus.PENDING;
+	}
+
 }
