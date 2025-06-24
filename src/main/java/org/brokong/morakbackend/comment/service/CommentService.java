@@ -16,10 +16,13 @@ import org.brokong.morakbackend.comment.query.CommentQueryRepository;
 import org.brokong.morakbackend.comment.repository.CommentRepository;
 import org.brokong.morakbackend.global.Security.UserPrincipal;
 import org.brokong.morakbackend.global.enums.SortType;
+import org.brokong.morakbackend.global.request.ReportRequestDto;
 import org.brokong.morakbackend.like.Repository.CommentLikeRepository;
 import org.brokong.morakbackend.like.entity.CommentLike;
 import org.brokong.morakbackend.post.entity.Post;
 import org.brokong.morakbackend.post.repository.PostRepository;
+import org.brokong.morakbackend.report.entity.CommentReport;
+import org.brokong.morakbackend.report.repository.CommentReportRepository;
 import org.brokong.morakbackend.user.entity.User;
 import org.brokong.morakbackend.user.repository.UserRepository;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +41,7 @@ public class CommentService {
 	private final PostRepository postRepository;
 	private final CommentLikeRepository commentLikeRepository;
 	private final CommentQueryRepository commentQueryRepository;
+	private final CommentReportRepository commentReportRepository;
 
 	@Transactional
 	public CommentResponseDto createComment(CommentRequestDto request, UserPrincipal userPrincipal) {
@@ -233,5 +237,21 @@ public class CommentService {
 		Set<Long> likedCommentIds = commentLikeRepository.findLikedCommentIdsByUser(user);
 
 		return CommentResponseDto.from(comment, likedCommentIds.contains(commentIds), commentRepository.existsByParentComment(comment));
+	}
+
+	@Transactional
+	public void reportComment(Long commentId, ReportRequestDto requestDto, UserPrincipal userPrincipal) {
+		User user = userRepository.findByEmail(userPrincipal.getEmail())
+								  .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+		Comment comment = commentRepository.findById(commentId)
+										   .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
+
+		if (commentReportRepository.existsByUserAndComment(user, comment)) {
+			throw new IllegalArgumentException("이미 신고한 댓글입니다.");
+		}
+
+		CommentReport commentReport = new CommentReport(user, comment, requestDto.getReason());
+		commentReportRepository.save(commentReport);
 	}
 }

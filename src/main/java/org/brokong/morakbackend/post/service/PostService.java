@@ -4,13 +4,13 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.Security.UserPrincipal;
 import org.brokong.morakbackend.global.enums.SortType;
+import org.brokong.morakbackend.global.request.ReportRequestDto;
 import org.brokong.morakbackend.like.Repository.PostLikeRepository;
 import org.brokong.morakbackend.like.entity.PostLike;
 import org.brokong.morakbackend.post.dto.PostResponseDto;
 import org.brokong.morakbackend.post.entity.Post;
 import org.brokong.morakbackend.post.query.PostQueryRepository;
 import org.brokong.morakbackend.post.repository.PostRepository;
-import org.brokong.morakbackend.report.dto.PostReportRequestDto;
 import org.brokong.morakbackend.report.entity.PostReport;
 import org.brokong.morakbackend.report.repository.PostReportRepository;
 import org.brokong.morakbackend.user.entity.User;
@@ -134,7 +134,7 @@ public class PostService {
 	}
 
 	@Transactional
-	public void reportPost(Long postId, PostReportRequestDto requestDto, UserPrincipal userPrincipal) {
+	public void reportPost(Long postId, ReportRequestDto requestDto, UserPrincipal userPrincipal) {
 
 		User user = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 		Post post = postRepository.findByIdWithUser(postId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
@@ -143,12 +143,7 @@ public class PostService {
 			throw new IllegalArgumentException("이미 신고한 게시글입니다.");
 		}
 
-		PostReport postReport = PostReport.builder()
-			.post(post)
-			.user(user)
-			.content(requestDto.getContent())
-			.build();
-
+		PostReport postReport = new PostReport(user, post, requestDto.getReason());
 		postReportRepository.save(postReport);
 	}
 }

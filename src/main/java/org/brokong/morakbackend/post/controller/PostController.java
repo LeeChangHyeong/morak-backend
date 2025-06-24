@@ -3,9 +3,9 @@ package org.brokong.morakbackend.post.controller;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.Security.UserPrincipal;
 import org.brokong.morakbackend.global.enums.SortType;
+import org.brokong.morakbackend.global.request.ReportRequestDto;
 import org.brokong.morakbackend.global.response.ResponseDto;
 import org.brokong.morakbackend.post.dto.PostRequestDto;
-import org.brokong.morakbackend.report.dto.PostReportRequestDto;
 import org.brokong.morakbackend.post.dto.PostResponseDto;
 import org.brokong.morakbackend.post.service.PostService;
 
@@ -94,7 +94,7 @@ public class PostController {
 	@PostMapping("/{postId}/report")
 	public ResponseEntity<ResponseDto<Void>> reportPost(
 		@PathVariable Long postId,
-		@RequestBody PostReportRequestDto requestDto,
+		@RequestBody ReportRequestDto requestDto,
 		@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
 		postService.reportPost(postId, requestDto, userPrincipal);

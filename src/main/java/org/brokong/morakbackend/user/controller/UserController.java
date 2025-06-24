@@ -3,6 +3,7 @@ package org.brokong.morakbackend.user.controller;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.Security.UserPrincipal;
+import org.brokong.morakbackend.global.request.ReportRequestDto;
 import org.brokong.morakbackend.global.response.ResponseDto;
 import org.brokong.morakbackend.user.dto.response.UserResponseDto;
 import org.brokong.morakbackend.user.service.UserService;
@@ -13,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -73,10 +75,14 @@ public class UserController {
 
     // 유저 신고
     @PostMapping("/{userId}/report")
-    public ResponseEntity<ResponseDto<String>> reportUser(@PathVariable Long userId) {
-        ResponseDto<String> response = new ResponseDto<>("사용자 신고 성공", "User reported successfully");
+    public ResponseEntity<ResponseDto<String>> reportUser(@PathVariable Long userId,
+                                                          @RequestBody ReportRequestDto requestDto,
+                                                          @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        userService.reportUser(userId, requestDto, userPrincipal);
 
-        return ResponseEntity.status(HttpStatus.OK).body(response);
+        ResponseDto<String> response = new ResponseDto<>("사용자 신고 성공", "유저가 정상적으로 신고되었습니다.");
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // 유저 탈퇴

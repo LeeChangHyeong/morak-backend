@@ -9,14 +9,13 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.brokong.morakbackend.global.entity.BaseEntity;
-import org.brokong.morakbackend.post.entity.Post;
+import org.brokong.morakbackend.comment.entity.Comment;
 import org.brokong.morakbackend.user.entity.User;
 
+@Entity
 @Getter
 @NoArgsConstructor
-@Entity
-public class PostReport extends BaseEntity {
+public class CommentReport {
 
 	@Id
 	@GeneratedValue
@@ -30,16 +29,16 @@ public class PostReport extends BaseEntity {
 
 	// 신고 대상 게시글
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "post_id", nullable = false)
-	private Post post;
+	@JoinColumn(name = "comment_id", nullable = false)
+	private Comment comment;
 
 	// 신고 사유
 	@Column(nullable = false)
 	private String reason;
 
-	public PostReport(User user, Post post, String reason) {
+	public CommentReport(User user, Comment comment, String reason) {
 		this.user = user;
-		this.post = post;
+		this.comment = comment;
 		this.reason = reason;
 	}
 }

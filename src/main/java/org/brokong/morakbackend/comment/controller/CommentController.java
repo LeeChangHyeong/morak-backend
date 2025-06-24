@@ -7,6 +7,7 @@ import org.brokong.morakbackend.comment.dto.CommentUpdateRequestDto;
 import org.brokong.morakbackend.comment.service.CommentService;
 import org.brokong.morakbackend.global.Security.UserPrincipal;
 import org.brokong.morakbackend.global.enums.SortType;
+import org.brokong.morakbackend.global.request.ReportRequestDto;
 import org.brokong.morakbackend.global.response.ResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -103,6 +104,17 @@ public class CommentController {
 		Page<CommentResponseDto> replies = commentService.getReplies(parentId, page - 1, size, userPrincipal);
 
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("대댓글 조회 성공", replies));
+	}
+
+	@PostMapping("/{commentId}/report")
+	public ResponseEntity<ResponseDto<Void>> reportComment(
+		@PathVariable Long commentId,
+		@RequestBody ReportRequestDto requestDto,
+		@AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+		commentService.reportComment(commentId, requestDto, userPrincipal);
+
+		return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDto<>("댓글이 성공적으로 신고되었습니다.", null));
 	}
 
 }

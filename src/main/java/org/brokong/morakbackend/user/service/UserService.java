@@ -2,6 +2,11 @@ package org.brokong.morakbackend.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.Security.UserPrincipal;
+import org.brokong.morakbackend.global.request.ReportRequestDto;
+import org.brokong.morakbackend.post.entity.Post;
+import org.brokong.morakbackend.report.entity.PostReport;
+import org.brokong.morakbackend.report.entity.UserReport;
+import org.brokong.morakbackend.report.repository.UserReportRepository;
 import org.brokong.morakbackend.user.dto.response.UserResponseDto;
 import org.brokong.morakbackend.user.entity.User;
 import org.brokong.morakbackend.user.repository.UserRepository;
@@ -9,12 +14,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
+	private final UserReportRepository userReportRepository;
 
 	public UserResponseDto getMyInfo(UserPrincipal userPrincipal) {
 
@@ -75,4 +82,18 @@ public class UserService {
 
         userRepository.save(user);
     }
+
+	@Transactional
+	public void reportUser(Long userId, ReportRequestDto requestDto, UserPrincipal userPrincipal) {
+
+		User user = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+		User targetUser = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+		if(userReportRepository.existsByUserAndTargetUser(user, targetUser)) {
+			throw new IllegalArgumentException("이미 신고한 사용자입니다.");
+		}
+
+		UserReport userReport = new UserReport(user, targetUser, requestDto.getReason());
+		userReportRepository.save(userReport);
+	}
 }
