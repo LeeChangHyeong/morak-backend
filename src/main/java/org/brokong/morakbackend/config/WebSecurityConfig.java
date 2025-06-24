@@ -19,8 +19,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.io.IOException;
-
 @Configuration
 @RequiredArgsConstructor
 public class WebSecurityConfig {
@@ -92,6 +90,7 @@ public class WebSecurityConfig {
 				.requestMatchers(HttpMethod.GET, apiPrefix + "/posts").permitAll()
 				.requestMatchers(HttpMethod.GET, apiPrefix + "/posts/*").permitAll()
 				.requestMatchers(HttpMethod.GET, apiPrefix + "/comments/root").permitAll()
+				.requestMatchers(HttpMethod.GET, apiPrefix + "/comments/*").permitAll()
 				.requestMatchers(HttpMethod.GET, apiPrefix + "/comments/*/replies").permitAll()
 				.requestMatchers(HttpMethod.GET, apiPrefix + "/users/search").permitAll()
 				.requestMatchers(HttpMethod.GET, apiPrefix + "/users/*/nickname/*").permitAll()
