@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @Getter
 @NoArgsConstructor
-@Entity
+@Entity(name = "users")
 public class User extends BaseEntity {
 
     @Id

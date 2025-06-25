@@ -3,6 +3,7 @@ package org.brokong.morakbackend.friend.service;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.friend.entity.Friend;
 import org.brokong.morakbackend.friend.entity.FriendRequest;
+import org.brokong.morakbackend.friend.enums.FriendRequestStatus;
 import org.brokong.morakbackend.friend.repository.FriendRepository;
 import org.brokong.morakbackend.friend.repository.FriendRequestRepository;
 import org.brokong.morakbackend.global.Security.UserPrincipal;
@@ -30,8 +31,9 @@ public class FriendService {
 		}
 		// 중복 요청 방지 - 양방향 모두 확인
 		boolean alreadyRequested = friendRequestRepository
-									   .findBySenderAndReceiver(user, receiver).isPresent()
-								   || friendRequestRepository.findBySenderAndReceiver(receiver, user).isPresent();
+				.findBySenderAndReceiverAndFriendRequestStatus(user, receiver, FriendRequestStatus.PENDING).isPresent()
+				|| friendRequestRepository.findBySenderAndReceiverAndFriendRequestStatus(receiver, user, FriendRequestStatus.PENDING).isPresent();
+
 
 		if (alreadyRequested) {
 			throw new IllegalArgumentException("이미 친구 요청이 존재합니다.");

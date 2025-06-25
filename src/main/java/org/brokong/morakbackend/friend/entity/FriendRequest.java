@@ -27,19 +27,19 @@ public class FriendRequest extends BaseEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private FriendRequestStatus friendRequeststatus;
+	private FriendRequestStatus friendRequestStatus;
 
 	public FriendRequest(User sender, User receiver) {
 		this.sender = sender;
 		this.receiver = receiver;
-		this.friendRequeststatus = FriendRequestStatus.PENDING;
+		this.friendRequestStatus = FriendRequestStatus.PENDING;
 	}
 
 	public void accept() {
-		this.friendRequeststatus = FriendRequestStatus.ACCEPTED;
+		this.friendRequestStatus = FriendRequestStatus.ACCEPTED;
 	}
 
 	public void reject() {
-		this.friendRequeststatus = FriendRequestStatus.REJECTED;
+		this.friendRequestStatus = FriendRequestStatus.REJECTED;
 	}
 }
