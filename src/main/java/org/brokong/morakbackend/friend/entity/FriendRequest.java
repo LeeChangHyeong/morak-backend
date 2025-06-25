@@ -38,4 +38,8 @@ public class FriendRequest extends BaseEntity {
 	public void accept() {
 		this.friendRequeststatus = FriendRequestStatus.ACCEPTED;
 	}
+
+	public void reject() {
+		this.friendRequeststatus = FriendRequestStatus.REJECTED;
+	}
 }

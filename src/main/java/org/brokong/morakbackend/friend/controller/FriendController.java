@@ -38,4 +38,14 @@ public class FriendController {
 		friendService.acceptFriendRequest(userPrincipal, requestId);
 		return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDto<>("친구 요청이 정상적으로 수락되었습니다.", null));
 	}
+
+	@PostMapping("/request/{requestId}/reject")
+	public ResponseEntity<ResponseDto<Void>> rejectFriendRequest(
+		@PathVariable Long requestId,
+		@AuthenticationPrincipal UserPrincipal userPrincipal
+	) {
+
+		friendService.rejectFriendRequest(userPrincipal, requestId);
+		return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDto<>("친구 요청이 정상적으로 거절되었습니다.", null));
+	}
 }
