@@ -48,4 +48,14 @@ public class FriendController {
 		friendService.rejectFriendRequest(userPrincipal, requestId);
 		return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDto<>("친구 요청이 정상적으로 거절되었습니다.", null));
 	}
+
+	@PostMapping("/{friendId}/delete")
+	public ResponseEntity<ResponseDto<Void>> deleteFriend(
+		@PathVariable Long friendId,
+		@AuthenticationPrincipal UserPrincipal userPrincipal
+	) {
+
+		friendService.deleteFriend(userPrincipal, friendId);
+		return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDto<>("친구 삭제가 정상적으로 처리되었습니다.", null));
+	}
 }

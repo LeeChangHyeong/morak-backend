@@ -75,4 +75,23 @@ public class FriendService {
 		Friend friend = new Friend(friendRequest.getSender(), friendRequest.getReceiver());
 		friendRepository.save(friend);
 	}
+
+	@Transactional
+	public void deleteFriend(UserPrincipal userPrincipal, Long friendId) {
+		Friend friend = friendRepository.findById(friendId)
+										.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 친구 관계입니다."));
+
+		String currentUserEmail = userPrincipal.getEmail();
+
+		// 현재 유저가 sender 또는 receiver가 아니면 삭제 권한 없음
+		boolean isAuthorized = friend.getSender().getEmail().equals(currentUserEmail) ||
+							   friend.getReceiver().getEmail().equals(currentUserEmail);
+
+		if (!isAuthorized) {
+			throw new IllegalArgumentException("해당 친구 관계를 삭제할 권한이 없습니다.");
+		}
+
+		friendRepository.delete(friend);
+	}
+
 }
