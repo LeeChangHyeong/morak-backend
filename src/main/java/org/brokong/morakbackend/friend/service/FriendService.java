@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.friend.entity.Friend;
 import org.brokong.morakbackend.friend.entity.FriendRequest;
 import org.brokong.morakbackend.friend.enums.FriendRequestStatus;
+import org.brokong.morakbackend.friend.repository.BlockRepository;
 import org.brokong.morakbackend.friend.repository.FriendRepository;
 import org.brokong.morakbackend.friend.repository.FriendRequestRepository;
 import org.brokong.morakbackend.global.Security.UserPrincipal;
@@ -19,6 +20,7 @@ public class FriendService {
 	private final UserRepository userRepository;
 	private final FriendRequestRepository friendRequestRepository;
 	private final FriendRepository friendRepository;
+	private final BlockRepository blockRepository;
 
 	@Transactional
 	public void sendFriendRequest(UserPrincipal userPrincipal, Long receiverId) {
@@ -29,6 +31,18 @@ public class FriendService {
 		if (user.getId().equals(receiverId)) {
 			throw new IllegalArgumentException("자기 자신에게는 친구 요청을 할 수 없습니다.");
 		}
+
+		// 차단 체크 1: 내가 차단한 사용자
+		if (blockRepository.existsByBlockerAndBlocked(user, receiver)) {
+			throw new IllegalArgumentException("차단한 사용자에게는 친구 요청을 보낼 수 없습니다.");
+		}
+
+		// 차단 체크 2: 상대가 나를 차단한 경우
+		if (blockRepository.existsByBlockerAndBlocked(receiver, user)) {
+			throw new IllegalArgumentException("상대방에게 차단당한 상태입니다.");
+		}
+
+
 		// 중복 요청 방지 - 양방향 모두 확인
 		boolean alreadyRequested = friendRequestRepository
 				.findBySenderAndReceiverAndFriendRequestStatus(user, receiver, FriendRequestStatus.PENDING).isPresent()
