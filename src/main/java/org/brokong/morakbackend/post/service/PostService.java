@@ -2,10 +2,10 @@ package org.brokong.morakbackend.post.service;
 
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.brokong.morakbackend.global.Security.UserPrincipal;
+import org.brokong.morakbackend.global.security.UserPrincipal;
 import org.brokong.morakbackend.global.enums.SortType;
 import org.brokong.morakbackend.global.request.ReportRequestDto;
-import org.brokong.morakbackend.like.Repository.PostLikeRepository;
+import org.brokong.morakbackend.like.repository.PostLikeRepository;
 import org.brokong.morakbackend.like.entity.PostLike;
 import org.brokong.morakbackend.post.dto.PostResponseDto;
 import org.brokong.morakbackend.post.entity.Post;

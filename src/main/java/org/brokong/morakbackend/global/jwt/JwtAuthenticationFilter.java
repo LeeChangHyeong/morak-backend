@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.brokong.morakbackend.global.Security.UserPrincipal;
+import org.brokong.morakbackend.global.security.UserPrincipal;
 import org.brokong.morakbackend.global.redis.RedisService;
 import org.brokong.morakbackend.global.response.ResponseDto;
 import org.brokong.morakbackend.user.entity.User;

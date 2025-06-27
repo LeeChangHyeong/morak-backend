@@ -1,4 +1,4 @@
-package org.brokong.morakbackend.like.Repository;
+package org.brokong.morakbackend.like.repository;
 
 import org.brokong.morakbackend.like.entity.PostLike;
 import org.brokong.morakbackend.post.entity.Post;

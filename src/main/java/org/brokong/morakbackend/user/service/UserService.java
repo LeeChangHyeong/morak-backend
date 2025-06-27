@@ -1,16 +1,13 @@
 package org.brokong.morakbackend.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.brokong.morakbackend.global.Security.UserPrincipal;
+import org.brokong.morakbackend.global.security.UserPrincipal;
 import org.brokong.morakbackend.global.request.ReportRequestDto;
-import org.brokong.morakbackend.post.entity.Post;
-import org.brokong.morakbackend.report.entity.PostReport;
 import org.brokong.morakbackend.report.entity.UserReport;
 import org.brokong.morakbackend.report.repository.UserReportRepository;
 import org.brokong.morakbackend.user.dto.response.UserResponseDto;
 import org.brokong.morakbackend.user.entity.User;
 import org.brokong.morakbackend.user.repository.UserRepository;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

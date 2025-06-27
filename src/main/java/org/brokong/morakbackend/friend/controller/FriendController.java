@@ -2,7 +2,7 @@ package org.brokong.morakbackend.friend.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.friend.service.FriendService;
-import org.brokong.morakbackend.global.Security.UserPrincipal;
+import org.brokong.morakbackend.global.security.UserPrincipal;
 import org.brokong.morakbackend.global.response.ResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

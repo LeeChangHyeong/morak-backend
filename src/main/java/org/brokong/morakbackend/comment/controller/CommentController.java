@@ -5,7 +5,7 @@ import org.brokong.morakbackend.comment.dto.CommentRequestDto;
 import org.brokong.morakbackend.comment.dto.CommentResponseDto;
 import org.brokong.morakbackend.comment.dto.CommentUpdateRequestDto;
 import org.brokong.morakbackend.comment.service.CommentService;
-import org.brokong.morakbackend.global.Security.UserPrincipal;
+import org.brokong.morakbackend.global.security.UserPrincipal;
 import org.brokong.morakbackend.global.enums.SortType;
 import org.brokong.morakbackend.global.request.ReportRequestDto;
 import org.brokong.morakbackend.global.response.ResponseDto;

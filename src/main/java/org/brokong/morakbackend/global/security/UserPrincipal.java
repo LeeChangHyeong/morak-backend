@@ -1,4 +1,4 @@
-package org.brokong.morakbackend.global.Security;
+package org.brokong.morakbackend.global.security;
 
 import lombok.Builder;
 import lombok.Getter;

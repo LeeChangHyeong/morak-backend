@@ -1,4 +1,4 @@
-package org.brokong.morakbackend.global.Security;
+package org.brokong.morakbackend.global.security;
 
 import java.util.Optional;
 import org.springframework.security.core.Authentication;

@@ -1,4 +1,4 @@
-package org.brokong.morakbackend.like.Repository;
+package org.brokong.morakbackend.like.repository;
 
 import java.util.List;
 import java.util.Optional;

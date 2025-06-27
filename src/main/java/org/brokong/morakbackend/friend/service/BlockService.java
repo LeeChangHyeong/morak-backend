@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.friend.entity.Block;
 import org.brokong.morakbackend.friend.repository.BlockRepository;
 import org.brokong.morakbackend.friend.repository.FriendRepository;
-import org.brokong.morakbackend.global.Security.UserPrincipal;
+import org.brokong.morakbackend.global.security.UserPrincipal;
 import org.brokong.morakbackend.user.entity.User;
 import org.brokong.morakbackend.user.repository.UserRepository;
 import org.springframework.stereotype.Service;

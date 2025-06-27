@@ -2,7 +2,7 @@ package org.brokong.morakbackend.user.controller;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.brokong.morakbackend.global.Security.UserPrincipal;
+import org.brokong.morakbackend.global.security.UserPrincipal;
 import org.brokong.morakbackend.global.request.ReportRequestDto;
 import org.brokong.morakbackend.global.response.ResponseDto;
 import org.brokong.morakbackend.user.dto.response.UserResponseDto;
