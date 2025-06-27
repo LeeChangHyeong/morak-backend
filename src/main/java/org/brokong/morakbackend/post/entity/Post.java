@@ -14,6 +14,12 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @Entity
+@Table(indexes = {
+    @Index(name = "idx_post_user_id", columnList = "user_id"),
+    @Index(name = "idx_post_created_at", columnList = "created_at"),
+    @Index(name = "idx_post_like_count", columnList = "like_count"),
+    @Index(name = "idx_post_view_count", columnList = "view_count")
+})
 public class Post extends BaseEntity {
 
     @Id
@@ -41,7 +47,7 @@ public class Post extends BaseEntity {
     public Post(User user, String content) {
         this.user = user;
         this.content = content;
-        user.addPost(this);
+        // user.addPost(this); 제거 - User 엔티티의 OneToMany 제거로 불필요
     }
 
     public void decreaseLikeCount() {

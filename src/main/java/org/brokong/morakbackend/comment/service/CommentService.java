@@ -160,27 +160,28 @@ public class CommentService {
 		Page<Comment> rootComments = commentQueryRepository.findRootCommentsByPostWithSorting(postId, pageable, sortBy);
 
 		if (userPrincipal == null) {
-			// 비로그인시 모든 댓글 likedByLoginUser = false
-			return rootComments.map(comment -> CommentResponseDto.from(comment, false, commentRepository.existsByParentComment(comment)));
+			return rootComments.map(comment ->
+										CommentResponseDto.from(comment, false, commentRepository.existsByParentComment(comment)));
 		}
 
 		// 로그인 유저면
 		User user = userRepository.findByEmail(userPrincipal.getEmail())
 			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
-		// 댓글 ID 추출
 		List<Long> commentIds = rootComments.getContent().stream()
-			.map(Comment::getId)
-			.toList();
+											.map(Comment::getId)
+											.toList();
 
-		// 로그인 유저가 좋아요 누른 댓글 ID 추출
-		Set<Long> likedCommentIds = commentLikeRepository.findAllByCommentIdInAndUser(commentIds, user)
-														 .stream()
-														 .map(like -> like.getComment().getId())
-														 .collect(Collectors.toSet());
+		// N+1 해결: 최적화된 메서드 사용
+		Set<Long> likedCommentIds = commentLikeRepository
+			.findLikedCommentIdsByCommentIdsAndUser(commentIds, user);
 
 		return rootComments.map(comment ->
-									CommentResponseDto.from(comment, likedCommentIds.contains(comment.getId()), commentRepository.existsByParentComment(comment)));
+									CommentResponseDto.from(
+										comment,
+										likedCommentIds.contains(comment.getId()),
+										commentRepository.existsByParentComment(comment)
+									));
 	}
 
 	public Page<CommentResponseDto> getReplies(Long parentId, int page, int size, UserPrincipal userPrincipal) {
@@ -202,11 +203,8 @@ public class CommentService {
 											.map(Comment::getId)
 											.toList();
 
-		// 로그인 유저가 좋아요 누른 댓글 ID 추출
-		Set<Long> likedCommentIds = commentLikeRepository.findAllByCommentIdInAndUser(commentIds, user)
-														 .stream()
-														 .map(like -> like.getComment().getId())
-														 .collect(Collectors.toSet());
+		// N+1 해결: 이미 최적화된 메서드 사용
+		Set<Long> likedCommentIds = commentLikeRepository.findLikedCommentIdsByCommentIdsAndUser(commentIds, user);
 
 
 		return replies.map(comment ->

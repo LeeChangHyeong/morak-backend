@@ -35,10 +35,6 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String nickname;
 
-    // 읽기 전용
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Post> posts = new ArrayList<>();
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private LoginType loginType;
@@ -64,11 +60,6 @@ public class User extends BaseEntity {
         this.pushToken = pushToken;
         this.status = status;
         this.role = role;
-    }
-
-
-    public void addPost(Post post) {
-        posts.add(post);
     }
 
     public void block() {

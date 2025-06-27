@@ -17,7 +17,6 @@ public class UserResponseDto {
     private Long id;
     private String email;
     private String nickname;
-    private List<PostResponseDto> posts;
     private LoginType loginType;
     private UserRoles role;
     private String accessToken;
@@ -28,9 +27,6 @@ public class UserResponseDto {
         dto.id = user.getId();
         dto.email = user.getEmail();
         dto.nickname = user.getNickname();
-        dto.posts = user.getPosts().stream()
-                        .map(PostResponseDto::from)
-                        .collect(Collectors.toList());
         dto.loginType = user.getLoginType();
         dto.role = user.getRole();
         return dto;

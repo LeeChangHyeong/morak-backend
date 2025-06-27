@@ -1,5 +1,6 @@
 package org.brokong.morakbackend.like.repository;
 
+import io.lettuce.core.dynamic.annotation.Param;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -15,7 +16,9 @@ public interface CommentLikeRepository extends JpaRepository<CommentLike, Long> 
 
 	boolean existsByCommentAndUser(Comment comment, User user);
 
-	List<CommentLike> findAllByCommentIdInAndUser(List<Long> commentIds, User user);
+	// 개선: ID만 조회하여 N+1 해결
+	@Query("SELECT cl.comment.id FROM CommentLike cl WHERE cl.comment.id IN :commentIds AND cl.user = :user")
+	Set<Long> findLikedCommentIdsByCommentIdsAndUser(@Param("commentIds") List<Long> commentIds, @Param("user") User user);
 
 	Optional<CommentLike> findByCommentAndUser(Comment comment, User user);
 
