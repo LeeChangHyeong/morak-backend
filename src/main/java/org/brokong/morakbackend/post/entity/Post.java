@@ -15,10 +15,23 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(indexes = {
-    @Index(name = "idx_post_user_id", columnList = "user_id"),
+    // 1. 전체 게시글 - 시간순 정렬 (가장 기본적인 쿼리)
     @Index(name = "idx_post_created_at", columnList = "created_at"),
-    @Index(name = "idx_post_like_count", columnList = "like_count"),
-    @Index(name = "idx_post_view_count", columnList = "view_count")
+    
+    // 2. 전체 게시글 - 인기순 정렬 (좋아요순 + 시간순)
+    @Index(name = "idx_post_like_created", columnList = "like_count, created_at"),
+    
+    // 3. 전체 게시글 - 조회순 정렬 (조회순 + 시간순)
+    @Index(name = "idx_post_view_created", columnList = "view_count, created_at"),
+    
+    // 4. 사용자별 게시글 - 시간순 정렬
+    @Index(name = "idx_post_user_created", columnList = "user_id, created_at"),
+    
+    // 5. 사용자별 게시글 - 인기순 정렬 (필요하다면)
+    // @Index(name = "idx_post_user_like_created", columnList = "user_id, like_count, created_at"),
+    
+    // 6. 사용자별 게시글 - 조회순 정렬 (필요하다면)  
+    // @Index(name = "idx_post_user_view_created", columnList = "user_id, view_count, created_at")
 })
 public class Post extends BaseEntity {
 
@@ -47,7 +60,6 @@ public class Post extends BaseEntity {
     public Post(User user, String content) {
         this.user = user;
         this.content = content;
-        // user.addPost(this); 제거 - User 엔티티의 OneToMany 제거로 불필요
     }
 
     public void decreaseLikeCount() {
