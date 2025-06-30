@@ -92,9 +92,9 @@ public class ChatWebSocketHandler extends TextWebSocketHandler {
         String receivedMessage = message.getPayload();
         log.info("Message received from {} ({}): {}", user.getNickname(), user.getEmail(), receivedMessage);
 
-        // 메시지 브로드캐스트
+        // 다른 사용자들에게만 메시지 브로드캐스트 (자신 제외)
         String formattedMessage = String.format("%s: %s", user.getNickname(), receivedMessage);
-        broadcastToAll(formattedMessage);
+        broadcastToOthers(user.getId(), formattedMessage);
     }
 
     // 연결이 끊어졌을 때 호출되는 메서드
