@@ -85,7 +85,12 @@ public class WebSecurityConfig {
 					apiPrefix + "/auth/check-email",
 					apiPrefix + "/email/**"
 				).permitAll()
-				.requestMatchers("/chat/**").permitAll()
+				
+				// ✅ WebSocket 경로 허용
+				.requestMatchers("/chat", "/chat/**").permitAll()
+				
+				// ✅ 정적 리소스 허용
+				.requestMatchers("/chat-test.html", "/static/**").permitAll()
 
 				// ✅ GET 요청만 허용하는 공개 API
 				.requestMatchers(HttpMethod.GET, apiPrefix + "/posts").permitAll()
