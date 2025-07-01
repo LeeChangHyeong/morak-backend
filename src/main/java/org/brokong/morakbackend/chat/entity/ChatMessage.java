@@ -27,13 +27,11 @@ public class ChatMessage extends BaseEntity {
 	@Column(name = "chat_message_id")
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "chat_room_id", nullable = false)
-	private ChatRoom chatRoom;
+	private String chatRoomId;
 
-	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "sender_id", nullable = false)
-	private User sender;
+	private String senderId;
 
 	@Column(nullable = false, columnDefinition = "TEXT")
 	private String content;
@@ -46,9 +44,9 @@ public class ChatMessage extends BaseEntity {
 	private boolean isRead = false;
 
 	@Builder
-	public ChatMessage(ChatRoom chatRoom, User sender, String content, MessageType type) {
-		this.chatRoom = chatRoom;
-		this.sender = sender;
+	public ChatMessage(String chatRoomId, String senderId, String content, MessageType type) {
+		this.chatRoomId = chatRoomId;
+		this.senderId = senderId;
 		this.content = content;
 		this.type = type;
 	}
