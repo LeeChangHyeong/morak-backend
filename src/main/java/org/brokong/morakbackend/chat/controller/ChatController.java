@@ -3,6 +3,7 @@ package org.brokong.morakbackend.chat.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.brokong.morakbackend.chat.dto.ChatMessageDto;
+import org.brokong.morakbackend.chat.service.ChatService;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -16,6 +17,7 @@ public class ChatController {
 
 	// 특정 사용자나 방에 메시지를 보내기 위한 템플릿
 	private final SimpMessagingTemplate messagingTemplate;
+	private final ChatService chatService;
 
 	// 채팅방 입장 처리
 	// /ws/chat.join
@@ -47,7 +49,7 @@ public class ChatController {
 				 chatMessageDto.getRoomId(), chatMessageDto.getSenderNickname(), chatMessageDto.getMessage());
 
 		// TODO: 여기서 메시지를 DB에 저장하는 로직 추가 예정
-		// chatService.saveMessage(chatMessage);
+		// chatService.saveMessage(chatMessageDto, userPrincipal);
 
 		messagingTemplate.convertAndSend(
 			"/topic/chatroom/" + chatMessageDto.getRoomId(), chatMessageDto

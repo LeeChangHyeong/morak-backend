@@ -77,7 +77,7 @@ public class WebSecurityConfig {
 		http
 			.csrf(csrf -> csrf.disable()) // JWT 방식에서는 CSRF 비활성화
 			.authorizeHttpRequests(auth -> auth
-				// ✅ 회원가입
+				// 회원가입
 				.requestMatchers(
 					apiPrefix + "/auth/signup",
 					apiPrefix + "/auth/login",
@@ -86,13 +86,13 @@ public class WebSecurityConfig {
 					apiPrefix + "/email/**"
 				).permitAll()
 				
-				// ✅ WebSocket 경로 허용
-				.requestMatchers("/chat", "/chat/**").permitAll()
+				// WebSocket 경로 허용 (SockJS 포함)
+				.requestMatchers("/ws", "/ws/**").permitAll()
 				
-				// ✅ 정적 리소스 허용
+				// 정적 리소스 허용
 				.requestMatchers("/chat-test.html", "/static/**").permitAll()
 
-				// ✅ GET 요청만 허용하는 공개 API
+				// GET 요청만 허용하는 공개 API
 				.requestMatchers(HttpMethod.GET, apiPrefix + "/posts").permitAll()
 				.requestMatchers(HttpMethod.GET, apiPrefix + "/posts/*").permitAll()
 				.requestMatchers(HttpMethod.GET, apiPrefix + "/comments/root").permitAll()
@@ -102,7 +102,7 @@ public class WebSecurityConfig {
 				.requestMatchers(HttpMethod.GET, apiPrefix + "/users/*/nickname/*").permitAll()
 				.requestMatchers(HttpMethod.GET, apiPrefix + "/users/*").permitAll()
 
-				// ✅ 나머지 모든 요청은 인증 필요
+				// 나머지 모든 요청은 인증 필요
 				.anyRequest().authenticated()
 			)
 			.exceptionHandling(exceptions -> exceptions

@@ -10,13 +10,13 @@ import org.brokong.morakbackend.chat.enums.MessageType;
 public class ChatMessageDto {
 
 	private MessageType type;
-	private String roomId;
+	private Long roomId;
 	private String senderNickname;
 	private String message;
 	private String timestamp;
 
 	// 일반 채팅 메시지 생성
-	public static ChatMessageDto createChatMessage(String roomId, String senderNickname, String message) {
+	public static ChatMessageDto createChatMessage(Long roomId, String senderNickname, String message) {
 		return ChatMessageDto.builder()
 							 .type(MessageType.CHAT)
 							 .roomId(roomId)
@@ -27,7 +27,7 @@ public class ChatMessageDto {
 	}
 
 	// 입장 메시지 생성
-	public static ChatMessageDto createJoinMessage(String roomId, String senderNickname) {
+	public static ChatMessageDto createJoinMessage(Long roomId, String senderNickname) {
 		return ChatMessageDto.builder()
 							 .type(MessageType.JOIN)
 							 .roomId(roomId)
@@ -38,7 +38,7 @@ public class ChatMessageDto {
 	}
 
 	// 퇴장 메시지 생성
-	public static ChatMessageDto createLeaveMessage(String roomId, String senderNickname) {
+	public static ChatMessageDto createLeaveMessage(Long roomId, String senderNickname) {
 		return ChatMessageDto.builder()
 							 .type(MessageType.LEAVE)
 							 .roomId(roomId)
