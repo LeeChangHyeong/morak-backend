@@ -28,13 +28,13 @@ public class ChatMessage extends BaseEntity {
 	private Long id;
 
 	@JoinColumn(name = "chat_room_id", nullable = false)
-	private String chatRoomId;
+	private Long chatRoomId;
 
 	@JoinColumn(name = "sender_id", nullable = false)
-	private String senderId;
+	private String senderNickname;
 
 	@Column(nullable = false, columnDefinition = "TEXT")
-	private String content;
+	private String message;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -44,10 +44,10 @@ public class ChatMessage extends BaseEntity {
 	private boolean isRead = false;
 
 	@Builder
-	public ChatMessage(String chatRoomId, String senderId, String content, MessageType type) {
+	public ChatMessage(Long chatRoomId, String senderNickname, String message, MessageType type) {
 		this.chatRoomId = chatRoomId;
-		this.senderId = senderId;
-		this.content = content;
+		this.senderNickname = senderNickname;
+		this.message = message;
 		this.type = type;
 	}
 
