@@ -21,11 +21,11 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
 		config.enableSimpleBroker("/topic", "/queue");
 
 		// 클라이언트에서 메시지 보낼때 사용하는 경로
-		config.setApplicationDestinationPrefixes("/app");
+		config.setApplicationDestinationPrefixes("/ws");
 
 		log.info("STOMP 메시지 브로커 설정 완료");
 		log.info("구독 경로: /topic (단체), /queue (개인)");
-		log.info("메시지 보내는 경로: /app");
+		log.info("메시지 보내는 경로: /ws");
 	}
 
 	// 클라이언트가 웹소켓에 연결할 때 사용할 엔드포인트
