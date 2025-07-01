@@ -1,6 +1,10 @@
 package org.brokong.morakbackend.friend.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.brokong.morakbackend.friend.dto.response.FriendRequestResponseDto;
+import org.brokong.morakbackend.friend.dto.response.FriendResponseDto;
 import org.brokong.morakbackend.friend.entity.Friend;
 import org.brokong.morakbackend.friend.entity.FriendRequest;
 import org.brokong.morakbackend.friend.enums.FriendRequestStatus;
@@ -15,12 +19,57 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class FriendService {
 
 	private final UserRepository userRepository;
 	private final FriendRequestRepository friendRequestRepository;
 	private final FriendRepository friendRepository;
 	private final BlockRepository blockRepository;
+
+	/**
+	 * 내 친구 목록 조회
+	 */
+	public List<FriendResponseDto> getMyFriends(UserPrincipal userPrincipal) {
+		User currentUser = userRepository.findByEmail(userPrincipal.getEmail())
+				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+		List<Friend> friends = friendRepository.findByUsers(currentUser);
+		
+		return friends.stream()
+				.map(friend -> FriendResponseDto.from(friend, currentUser.getId()))
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * 받은 친구 요청 목록 조회
+	 */
+	public List<FriendRequestResponseDto> getReceivedFriendRequests(UserPrincipal userPrincipal) {
+		User currentUser = userRepository.findByEmail(userPrincipal.getEmail())
+				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+		List<FriendRequest> requests = friendRequestRepository
+				.findByReceiverAndFriendRequestStatus(currentUser, FriendRequestStatus.PENDING);
+		
+		return requests.stream()
+				.map(FriendRequestResponseDto::from)
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * 보낸 친구 요청 목록 조회
+	 */
+	public List<FriendRequestResponseDto> getSentFriendRequests(UserPrincipal userPrincipal) {
+		User currentUser = userRepository.findByEmail(userPrincipal.getEmail())
+				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+		List<FriendRequest> requests = friendRequestRepository
+				.findBySenderAndFriendRequestStatus(currentUser, FriendRequestStatus.PENDING);
+		
+		return requests.stream()
+				.map(FriendRequestResponseDto::from)
+				.collect(Collectors.toList());
+	}
 
 	@Transactional
 	public void sendFriendRequest(UserPrincipal userPrincipal, Long receiverId) {
@@ -30,6 +79,11 @@ public class FriendService {
 		// 자기 자신에게 요청 방지
 		if (user.getId().equals(receiverId)) {
 			throw new IllegalArgumentException("자기 자신에게는 친구 요청을 할 수 없습니다.");
+		}
+
+		// 이미 친구인지 확인
+		if (friendRepository.existsByUsers(user, receiver)) {
+			throw new IllegalArgumentException("이미 친구입니다.");
 		}
 
 		// 차단 체크 1: 내가 차단한 사용자
@@ -42,19 +96,16 @@ public class FriendService {
 			throw new IllegalArgumentException("상대방에게 차단당한 상태입니다.");
 		}
 
-
 		// 중복 요청 방지 - 양방향 모두 확인
 		boolean alreadyRequested = friendRequestRepository
 				.findBySenderAndReceiverAndFriendRequestStatus(user, receiver, FriendRequestStatus.PENDING).isPresent()
 				|| friendRequestRepository.findBySenderAndReceiverAndFriendRequestStatus(receiver, user, FriendRequestStatus.PENDING).isPresent();
-
 
 		if (alreadyRequested) {
 			throw new IllegalArgumentException("이미 친구 요청이 존재합니다.");
 		}
 
 		FriendRequest friendRequest = new FriendRequest(user, receiver);
-
 		friendRequestRepository.save(friendRequest);
 	}
 
@@ -85,9 +136,6 @@ public class FriendService {
 
 		friendRequest.reject();
 		friendRequestRepository.save(friendRequest);
-
-		Friend friend = new Friend(friendRequest.getSender(), friendRequest.getReceiver());
-		friendRepository.save(friend);
 	}
 
 	@Transactional
@@ -107,5 +155,4 @@ public class FriendService {
 
 		friendRepository.delete(friend);
 	}
-
 }

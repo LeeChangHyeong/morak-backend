@@ -1,12 +1,16 @@
 package org.brokong.morakbackend.friend.controller;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.brokong.morakbackend.friend.dto.response.FriendRequestResponseDto;
+import org.brokong.morakbackend.friend.dto.response.FriendResponseDto;
 import org.brokong.morakbackend.friend.service.FriendService;
 import org.brokong.morakbackend.global.security.UserPrincipal;
 import org.brokong.morakbackend.global.response.ResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,6 +22,39 @@ import org.springframework.web.bind.annotation.RestController;
 public class FriendController {
 
 	private final FriendService friendService;
+
+	/**
+	 * 내 친구 목록 조회
+	 */
+	@GetMapping
+	public ResponseEntity<ResponseDto<List<FriendResponseDto>>> getMyFriends(
+		@AuthenticationPrincipal UserPrincipal userPrincipal
+	) {
+		List<FriendResponseDto> friends = friendService.getMyFriends(userPrincipal);
+		return ResponseEntity.ok(new ResponseDto<>("친구 목록 조회 성공", friends));
+	}
+
+	/**
+	 * 받은 친구 요청 목록 조회
+	 */
+	@GetMapping("/requests/received")
+	public ResponseEntity<ResponseDto<List<FriendRequestResponseDto>>> getReceivedFriendRequests(
+		@AuthenticationPrincipal UserPrincipal userPrincipal
+	) {
+		List<FriendRequestResponseDto> requests = friendService.getReceivedFriendRequests(userPrincipal);
+		return ResponseEntity.ok(new ResponseDto<>("받은 친구 요청 조회 성공", requests));
+	}
+
+	/**
+	 * 보낸 친구 요청 목록 조회
+	 */
+	@GetMapping("/requests/sent")
+	public ResponseEntity<ResponseDto<List<FriendRequestResponseDto>>> getSentFriendRequests(
+		@AuthenticationPrincipal UserPrincipal userPrincipal
+	) {
+		List<FriendRequestResponseDto> requests = friendService.getSentFriendRequests(userPrincipal);
+		return ResponseEntity.ok(new ResponseDto<>("보낸 친구 요청 조회 성공", requests));
+	}
 
 	@PostMapping("/request/{receiverId}")
 	public ResponseEntity<ResponseDto<Void>> sendFriendRequest(
