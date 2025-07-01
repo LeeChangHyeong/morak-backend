@@ -12,7 +12,7 @@ import org.brokong.morakbackend.user.entity.User;
 public class Friend extends BaseEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "friend_id")
     private Long id;
 

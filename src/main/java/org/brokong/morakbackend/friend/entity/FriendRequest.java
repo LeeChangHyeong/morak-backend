@@ -13,7 +13,7 @@ import org.brokong.morakbackend.user.entity.User;
 public class FriendRequest extends BaseEntity {
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "friend_request_id")
 	private Long id;
 
