@@ -12,6 +12,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Builder;
@@ -43,17 +44,27 @@ public class ChatRoom extends BaseEntity {
 	@JoinColumn(name = "creater_id")
 	private User creater; // GROUP 타입일때만 사용
 
+	@Column(name = "last_message_at")
+	private LocalDateTime lastMessageAt; // 마지막 메시지 시간
+
 	@OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<ChatRoomMember> members = new ArrayList<>();
 
 	@OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
 	private List<ChatMessage> chatMessages = new ArrayList<>();
 
+
 	@Builder
 	public ChatRoom(String name, ChatRoomType type, User creater) {
 		this.name = name;
 		this.type = type;
 		this.creater = creater; // DIRECT일 때는 null
+		this.lastMessageAt = LocalDateTime.now();
+	}
+
+	// 새 메시지가 올 때마다 업데이트
+	public void updateLastMessageTime() {
+		this.lastMessageAt = LocalDateTime.now();
 	}
 
 }
