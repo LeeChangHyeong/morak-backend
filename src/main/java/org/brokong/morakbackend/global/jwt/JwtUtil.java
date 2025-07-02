@@ -6,91 +6,139 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
+import org.brokong.morakbackend.global.security.UserPrincipal;
+import org.brokong.morakbackend.user.enums.UserRoles;
+import org.brokong.morakbackend.user.enums.UserStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.util.Date;
 
 @Slf4j
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}")
-    private String secretKey;
+	@Value("${jwt.secret}")
+	private String secretKey;
 
-    private final long accessTokenExpireTime = 1000 * 60 * 60; // 토큰 만료 1시간
+	private final long accessTokenExpireTime = 1000 * 60 * 60; // 토큰 만료 1시간
 
-    // AccessToken 생성
-    public String createAccessToken(String userEmail, String userRole) {
+	// AccessToken 생성
+	public String createAccessToken(String userEmail, String userRole, String nickname, Long userId) {
 
-        return Jwts.builder()
-                .setSubject(userEmail)
-                .claim("role", userRole)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpireTime))
-                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS256)
-                .compact();
-    }
+		return Jwts.builder()
+				   .setSubject(userEmail)
+				   .claim("userId", userId)
+				   .claim("role", userRole)
+				   .claim("nickname", nickname)
+				   .setIssuedAt(new Date())
+				   .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpireTime))
+				   .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS256)
+				   .compact();
+	}
 
-    // AccessToken 에서 이메일 추출
-    public String getEmailFromAccessToken(String accessToken) {
+	// AccessToken 에서 userId 추출
+	public Long getUserIdFromAccessToken(String token) {
+		return Jwts.parserBuilder()
+				   .setSigningKey(secretKey.getBytes())
+				   .build()
+				   .parseClaimsJws(token)
+				   .getBody()
+				   .get("userId", Long.class);
+	}
 
-        return Jwts.parserBuilder()
-                .setSigningKey(secretKey.getBytes())
-                .build()
-                .parseClaimsJws(accessToken)
-                .getBody()
-                .getSubject();
-    }
+	// AccessToken 에서 이메일 추출
+	public String getEmailFromAccessToken(String accessToken) {
 
-    // AccessToken 에서 role 추출
-    public String getRoleFromAccessToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(secretKey.getBytes())
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .get("role", String.class);
-    }
+		return Jwts.parserBuilder()
+				   .setSigningKey(secretKey.getBytes())
+				   .build()
+				   .parseClaimsJws(accessToken)
+				   .getBody()
+				   .getSubject();
+	}
 
-    public boolean validateAccessToken(String accessToken) {
-        try {
-            Jwts.parserBuilder()
-                    .setSigningKey(secretKey.getBytes())
-                    .build()
-                    .parseClaimsJws(accessToken);
+	// AccessToken 에서 role 추출
+	public String getRoleFromAccessToken(String token) {
+		return Jwts.parserBuilder()
+				   .setSigningKey(secretKey.getBytes())
+				   .build()
+				   .parseClaimsJws(token)
+				   .getBody()
+				   .get("role", String.class);
+	}
 
-            return true;
-        } catch (ExpiredJwtException e) {
-            log.warn("만료된 JWT 토큰입니다.");
+	// AccessToken 에서 nickname 추출
+	public String getNicknameFromAccessToken(String token) {
+		return Jwts.parserBuilder()
+				   .setSigningKey(secretKey.getBytes())
+				   .build()
+				   .parseClaimsJws(token)
+				   .getBody()
+				   .get("nickname", String.class);
+	}
+
+	public boolean validateAccessToken(String accessToken) {
+		try {
+			Jwts.parserBuilder()
+				.setSigningKey(secretKey.getBytes())
+				.build()
+				.parseClaimsJws(accessToken);
+
+			return true;
+		} catch (ExpiredJwtException e) {
+			log.warn("만료된 JWT 토큰입니다.");
 			throw new ExpiredJwtException(e.getHeader(), e.getClaims(), "만료된 JWT 토큰입니다.");
-        } catch (JwtException e) {
-            log.warn("JWT 토큰이 유효하지 않습니다.");
+		} catch (JwtException e) {
+			log.warn("JWT 토큰이 유효하지 않습니다.");
 			throw new JwtException("유효하지 않은 JWT 토큰입니다.");
-        }
-    }
+		}
+	}
 
-    // 헤더에서 AccessToken 가져오기
-    public String extractAccessToken(HttpServletRequest request) {
-        String header = request.getHeader("Authorization");
+	// 헤더에서 AccessToken 가져오기
+	public String extractAccessToken(HttpServletRequest request) {
+		String header = request.getHeader("Authorization");
 
-        if(header != null && header.startsWith("Bearer ")) {
-            return header.substring(7);
-        }
+		if (header != null && header.startsWith("Bearer ")) {
+			return header.substring(7);
+		}
 
-        return null;
-    }
+		return null;
+	}
 
-    // 토큰 남은 시간 계산
-    public long getAccessTokenExpireTime(String accessToken) {
-        Date expiration = Jwts.parserBuilder()
-                .setSigningKey(secretKey.getBytes())
-                .build()
-                .parseClaimsJws(accessToken)
-                .getBody()
-                .getExpiration();
+	/**
+	 * JWT 토큰으로부터 UserPrincipal 생성 (WebSocket용)
+	 */
+	// UserPrincipal 생성 메서드
+	public UserPrincipal createUserPrincipalFromToken(String token) {
+		try {
+			String email = getEmailFromAccessToken(token);
+			String roleStr = getRoleFromAccessToken(token);
+			Long userId = getUserIdFromAccessToken(token);
+			String nickname = getNicknameFromAccessToken(token);
 
-        return expiration.getTime() - System.currentTimeMillis();
-    }
+			return UserPrincipal.builder()
+								.id(userId)
+								.email(email)
+								.nickname(nickname)
+								.role(UserRoles.valueOf(roleStr))
+								.status(UserStatus.ACTIVE) // 기본값
+								.build();
+
+		} catch (Exception e) {
+			throw new JwtException("토큰에서 사용자 정보 추출 실패: " + e.getMessage());
+		}
+	}
+
+	// 토큰 남은 시간 계산
+	public long getAccessTokenExpireTime(String accessToken) {
+		Date expiration = Jwts.parserBuilder()
+							  .setSigningKey(secretKey.getBytes())
+							  .build()
+							  .parseClaimsJws(accessToken)
+							  .getBody()
+							  .getExpiration();
+
+		return expiration.getTime() - System.currentTimeMillis();
+	}
 }
