@@ -8,6 +8,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -21,9 +22,12 @@ public class ChatController {
     @MessageMapping("/chatRoom/{roomId}")
     @SendTo("/sub/chatRoom/{roomId}")
     public ChatMessageDto chat(@DestinationVariable Long roomId,
-                               @Payload String message) {
+                               @Payload String message,
+                               StompHeaderAccessor headerAccessor) {
 
-        return chatService.saveAndGetChatMessage(roomId, message);
+        String sessionId = headerAccessor.getSessionId();
+
+        return chatService.saveAndGetChatMessage(roomId, message, sessionId);
     }
 
 
