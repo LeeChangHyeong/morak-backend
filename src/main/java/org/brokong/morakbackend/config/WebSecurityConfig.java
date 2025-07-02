@@ -88,9 +88,6 @@ public class WebSecurityConfig {
 				
 				// WebSocket 경로 허용 (SockJS 포함)
 				.requestMatchers("/ws", "/ws/**").permitAll()
-				
-				// 정적 리소스 허용
-				.requestMatchers("/chat-test.html", "/static/**").permitAll()
 
 				// GET 요청만 허용하는 공개 API
 				.requestMatchers(HttpMethod.GET, apiPrefix + "/posts").permitAll()

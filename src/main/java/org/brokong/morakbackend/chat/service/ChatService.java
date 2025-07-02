@@ -3,6 +3,7 @@ package org.brokong.morakbackend.chat.service;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.chat.dto.ChatMessageDto;
 import org.brokong.morakbackend.chat.entity.ChatMessage;
+import org.brokong.morakbackend.chat.enums.MessageType;
 import org.brokong.morakbackend.chat.repository.ChatMessageRepository;
 import org.springframework.stereotype.Service;
 
@@ -12,12 +13,12 @@ public class ChatService {
 
     private final ChatMessageRepository chatMessageRepository;
 
-    public ChatMessageDto saveAndGetChatMessage(Long roomId, ChatMessageDto chatMessageDto) {
+    public ChatMessageDto saveAndGetChatMessage(Long roomId, String message) {
         ChatMessage chatMessage = ChatMessage.builder()
-                .type(chatMessageDto.getType())
+                .type(MessageType.CHAT)
                 .chatRoomId(roomId)
-                .senderNickname(chatMessageDto.getSenderNickname())
-                .message(chatMessageDto.getMessage())
+                .senderNickname("이창형")
+                .message(message)
                 .build();
 
         ChatMessage savedChatMessage = chatMessageRepository.save(chatMessage);

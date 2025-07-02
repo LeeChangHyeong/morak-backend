@@ -20,8 +20,10 @@ public class ChatController {
     // 일반 채팅
     @MessageMapping("/chatRoom/{roomId}")
     @SendTo("/sub/chatRoom/{roomId}")
-    public ChatMessageDto chat(@DestinationVariable Long roomId, @Payload ChatMessageDto chatMessageDto) {
-        return chatService.saveAndGetChatMessage(roomId, chatMessageDto);
+    public ChatMessageDto chat(@DestinationVariable Long roomId,
+                               @Payload String message) {
+
+        return chatService.saveAndGetChatMessage(roomId, message);
     }
 
 
