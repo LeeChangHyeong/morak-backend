@@ -27,10 +27,10 @@ public class ChatMessage extends BaseEntity {
 	@Column(name = "chat_message_id")
 	private Long id;
 
-	@JoinColumn(name = "chat_room_id", nullable = false)
+	@Column(name = "chat_room_id", nullable = false)
 	private Long chatRoomId;
 
-	@JoinColumn(name = "sender_id", nullable = false)
+	@Column(name = "sender_nickname", nullable = false)
 	private String senderNickname;
 
 	@Column(nullable = false, columnDefinition = "TEXT")

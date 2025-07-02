@@ -20,7 +20,7 @@ public class ChatService {
                 .message(chatMessageDto.getMessage())
                 .build();
 
-        ChatMessage savedChatMessage =chatMessageRepository.save(chatMessage);
+        ChatMessage savedChatMessage = chatMessageRepository.save(chatMessage);
 
         return ChatMessageDto.builder()
                 .type(savedChatMessage.getType())
