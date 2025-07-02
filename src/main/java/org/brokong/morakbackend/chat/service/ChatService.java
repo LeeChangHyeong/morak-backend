@@ -42,11 +42,10 @@ public class ChatService {
 
         ChatMessage savedChatMessage = chatMessageRepository.save(chatMessage);
 
-        return ChatMessageDto.builder()
-                .type(savedChatMessage.getType())
-                .roomId(savedChatMessage.getChatRoomId())
-                .senderNickname(savedChatMessage.getSenderNickname())
-                .message(savedChatMessage.getMessage())
-                .build();
+        return ChatMessageDto.createChatMessage(
+                savedChatMessage.getChatRoomId(),
+                savedChatMessage.getSenderNickname(),
+                savedChatMessage.getMessage()
+        );
     }
 }
