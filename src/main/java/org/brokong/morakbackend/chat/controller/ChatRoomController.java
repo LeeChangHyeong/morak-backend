@@ -1,12 +1,19 @@
 package org.brokong.morakbackend.chat.controller;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.chat.dto.ChatRoomCreateRequestDto;
+import org.brokong.morakbackend.chat.dto.ChatRoomSeummaryDto;
+import org.brokong.morakbackend.chat.dto.ChatRoomSummaryDto;
+import org.brokong.morakbackend.chat.dto.ChatRoomSummaryResponseDto;
+import org.brokong.morakbackend.chat.repository.ChatRoomRepository;
 import org.brokong.morakbackend.chat.service.ChatRoomService;
 import org.brokong.morakbackend.global.response.ResponseDto;
 import org.brokong.morakbackend.global.security.UserPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,5 +33,12 @@ public class ChatRoomController {
 		chatRoomService.createChatRoom(userPrincipal, chatRoomCreateRequestDto);
 
 		return ResponseEntity.ok(new ResponseDto<>("채팅방이 정상적으로 생성되었습니다.", null));
+	}
+
+	@GetMapping("/{roomId}")
+	public ResponseEntity<ResponseDto<List<ChatRoomSummaryResponseDto>>> getAllChatRooms(@AuthenticationPrincipal UserPrincipal userPrincipal, @PathVariable Long roomId) {
+		List<ChatRoomSummaryResponseDto> chatRooms = chatRoomService.getChatRoomsByUser(userPrincipal, roomId);
+
+		return ResponseEntity.ok(new ResponseDto<>("채팅방 목록을 정상적으로 조회하였습니다.", chatRooms));
 	}
 }

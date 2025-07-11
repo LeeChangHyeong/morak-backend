@@ -1,6 +1,7 @@
 package org.brokong.morakbackend.chat.repository;
 
 import io.lettuce.core.dynamic.annotation.Param;
+import java.util.List;
 import java.util.Optional;
 import org.brokong.morakbackend.chat.entity.ChatRoom;
 import org.brokong.morakbackend.chat.enums.ChatRoomType;
@@ -23,4 +24,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 												   @Param("userId2") Long userId2,
 												   @Param("type") ChatRoomType type);
 
+	Optional<List<ChatRoom>> findAllByMembersUserId(Long userId);
 }

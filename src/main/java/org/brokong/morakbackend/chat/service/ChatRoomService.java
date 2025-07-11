@@ -1,9 +1,12 @@
 package org.brokong.morakbackend.chat.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.chat.dto.ChatRoomCreateRequestDto;
+import org.brokong.morakbackend.chat.dto.ChatRoomSummaryResponseDto;
 import org.brokong.morakbackend.chat.entity.ChatRoom;
 import org.brokong.morakbackend.chat.entity.ChatRoomMember;
 import org.brokong.morakbackend.chat.enums.ChatRoomType;
@@ -58,5 +61,39 @@ public class ChatRoomService {
 		newRoom.getMembers().add(member2);
 
 		chatRoomRepository.save(newRoom);
+	}
+
+	public List<ChatRoomSummaryResponseDto> getChatRoomsByUser(UserPrincipal userPrincipal, Long roomId) {
+		// ChatRoomMember 기준으로 유저가 속한 모든 채팅방 조회
+		List<ChatRoom> rooms = chatRoomRepository.findAllByMembersUserId(userPrincipal.getId())
+			.orElseThrow(() -> new RuntimeException("채팅방을 찾을 수 없습니다."));
+
+		return rooms.stream().map(room -> {
+			// 상대방 이름 찾기 (DIRECT)
+			String roomName;
+			if (room.getType() == ChatRoomType.DIRECT) {
+				roomName = room.getMembers().stream()
+					.map(ChatRoomMember::getUser)
+					.filter(user -> !user.getId().equals(userPrincipal.getId()))
+					.map(User::getNickname)
+					.findFirst()
+					.orElse("Unknown");
+			} else {
+				roomName = room.getName();
+			}
+
+			// 마지막 메시지 시간
+			LocalDateTime lastMessageTime = room.getLastMessageAt();
+
+			// 마지막 메시지 내용
+			String lastMessage = room.getLastMessage();
+
+			ChatRoomSummaryResponseDto dto = new ChatRoomSummaryResponseDto();
+			dto.setRoomId(room.getId());
+			dto.setRoomName(roomName);
+			dto.setLastMessageTime(lastMessageTime);
+			dto.setLastMessage(lastMessage);
+			return dto;
+		}).collect(Collectors.toList());
 	}
 }

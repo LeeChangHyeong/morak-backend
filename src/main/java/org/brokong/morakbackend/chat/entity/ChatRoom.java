@@ -44,6 +44,9 @@ public class ChatRoom extends BaseEntity {
 	@JoinColumn(name = "creater_id")
 	private User creater; // GROUP 타입일때만 사용
 
+	@Column(name = "last_message")
+	private String lastMessage;
+
 	@Column(name = "last_message_at")
 	private LocalDateTime lastMessageAt; // 마지막 메시지 시간
 
@@ -60,7 +63,8 @@ public class ChatRoom extends BaseEntity {
 	}
 
 	// 새 메시지가 올 때마다 업데이트
-	public void updateLastMessageTime() {
+	public void updateLastMessageTime(String message) {
+		this.lastMessage = message;
 		this.lastMessageAt = LocalDateTime.now();
 	}
 
