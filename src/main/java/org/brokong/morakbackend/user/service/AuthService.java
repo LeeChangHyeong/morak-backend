@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.jwt.JwtUtil;
+import org.brokong.morakbackend.global.redis.RedisKey;
 import org.brokong.morakbackend.global.redis.RedisService;
 import org.brokong.morakbackend.user.dto.response.LoginResponseDto;
 import org.brokong.morakbackend.user.dto.response.UserResponseDto;
@@ -75,7 +76,7 @@ public class AuthService {
 		String refreshToken = UUID.randomUUID().toString();
 
 		// Redis 저장 (key: email, value: refreshToken, 유효시간: 14일)
-		redisService.setValue("refresh_token:" + user.getEmail(), refreshToken, Duration.ofDays(14));
+		redisService.setValue(RedisKey.refreshTokenKey(user.getEmail()), refreshToken, Duration.ofDays(14));
 
 		return LoginResponseDto.from(user, accessToken, refreshToken);
 	}
@@ -91,8 +92,8 @@ public class AuthService {
 		String email = jwtUtil.getEmailFromAccessToken(accessToken);
 
 		try {
-			redisService.setValue("access_token_blacklist:" + accessToken, "logout", Duration.ofMillis(expiration));
-			redisService.deleteValue("refresh_token:" + email);
+			redisService.setValue(RedisKey.accessTokenBlacklistKey(accessToken), "logout", Duration.ofMillis(expiration));
+			redisService.deleteValue(RedisKey.refreshTokenKey(email));
 		} catch (Exception e) {
 			throw new IllegalArgumentException("로그아웃에 실패했습니다. 관리자에게 문의해주세요.");
 		}

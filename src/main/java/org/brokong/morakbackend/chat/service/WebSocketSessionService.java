@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.brokong.morakbackend.chat.dto.WebSocketSessionDto;
+import org.brokong.morakbackend.global.redis.RedisKey;
 import org.brokong.morakbackend.global.redis.RedisService;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +17,10 @@ public class WebSocketSessionService {
 
 	private final RedisService redisService;
 	private final ObjectMapper objectMapper;
-	private static final String SESSION_PREFIX = "sessionId:";
 	private static final Duration SESSION_TIMEOUT = Duration.ofHours(24);
 
-	// 레디스에 sessionId : 유저 정보 저장
 	public void saveSession(String sessionId, Long userId, String nickname) {
-		String key = SESSION_PREFIX + sessionId;
+		String key = RedisKey.sessionKey(sessionId);
 		WebSocketSessionDto session = new WebSocketSessionDto(
 			userId.toString(),
 			nickname,
@@ -39,7 +38,7 @@ public class WebSocketSessionService {
 	}
 
 	public WebSocketSessionDto getSession(String sessionId) {
-		String key = SESSION_PREFIX + sessionId;
+		String key = RedisKey.sessionKey(sessionId);
 
 		try {
 			String sessionJson = redisService.getValue(key);
@@ -53,13 +52,13 @@ public class WebSocketSessionService {
 	}
 
 	public void removeSession(String sessionId) {
-		String key = SESSION_PREFIX + sessionId;
+		String key = RedisKey.sessionKey(sessionId);
 		redisService.deleteValue(key);
 		log.info("WebSocket 세션 삭제: key={}", key);
 	}
 
 	public boolean isSessionExists(String sessionId) {
-		String key = SESSION_PREFIX + sessionId;
+		String key = RedisKey.sessionKey(sessionId);
 		return redisService.isExists(key);
 	}
 }
