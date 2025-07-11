@@ -1,7 +1,6 @@
 package org.brokong.morakbackend.chat.controller;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.brokong.morakbackend.chat.dto.ChatMessageDto;
 import org.brokong.morakbackend.chat.service.ChatService;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -10,10 +9,11 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@Slf4j
 @RequiredArgsConstructor
+@RequestMapping("${api.prefix}/chat")
 public class ChatController {
 
     private final ChatService chatService;
@@ -29,6 +29,4 @@ public class ChatController {
 
         return chatService.saveAndGetChatMessage(roomId, message, sessionId);
     }
-
-
 }

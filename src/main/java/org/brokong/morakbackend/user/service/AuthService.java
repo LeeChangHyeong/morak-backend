@@ -78,6 +78,8 @@ public class AuthService {
 		// Redis 저장 (key: email, value: refreshToken, 유효시간: 14일)
 		redisService.setValue(RedisKey.refreshTokenKey(user.getEmail()), refreshToken, Duration.ofDays(14));
 
+
+
 		return LoginResponseDto.from(user, accessToken, refreshToken);
 	}
 

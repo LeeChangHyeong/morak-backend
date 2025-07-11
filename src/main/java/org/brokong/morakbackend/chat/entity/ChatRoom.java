@@ -32,7 +32,7 @@ public class ChatRoom extends BaseEntity {
 	@Column(name = "chat_room_id")
 	private Long id;
 
-	@Column(nullable = false)
+	@Column
 	private String name;
 
 	@Enumerated(EnumType.STRING)
