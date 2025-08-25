@@ -17,8 +17,8 @@ COPY src src
 # 애플리케이션 빌드
 RUN ./gradlew build -x test --no-daemon
 
-# JAR 파일을 실행 가능한 위치로 복사
-RUN cp build/libs/*.jar app.jar
+# JAR 파일을 실행 가능한 위치로 복사 (수정된 부분)
+RUN cp build/libs/*-SNAPSHOT.jar app.jar
 
 # 포트 노출
 EXPOSE 8080
