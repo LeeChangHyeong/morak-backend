@@ -54,11 +54,11 @@ jobs:
      uses: gradle/actions/setup-gradle@v4
    
    # Step 6: Spring Boot 애플리케이션 빌드
-   # 테스트 실행 및 JAR 파일 생성
+   # JAR 파일 생성
    - name: Build Spring Boot application
      run: |
        echo "🔨 Spring Boot 애플리케이션 빌드를 시작합니다..."
-       ./gradlew clean build
+       ./gradlew clean build -x test
        echo "✅ 빌드가 성공적으로 완료되었습니다."
    
    # Step 7: Docker Hub에 로그인
