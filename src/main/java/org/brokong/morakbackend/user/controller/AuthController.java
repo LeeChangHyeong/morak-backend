@@ -27,9 +27,7 @@ public class AuthController {
 
     @Operation(summary = "회원가입", description = "이메일, 비밀번호, 닉네임으로 회원가입을 진행합니다.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "회원가입 성공"),
-        @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터"),
-        @ApiResponse(responseCode = "409", description = "이미 존재하는 이메일 또는 닉네임")
+        @ApiResponse(responseCode = "201", description = "회원가입 성공")
     })
     @PostMapping("/signup")
     public ResponseEntity<ResponseDto<UserResponseDto>> signUp(
@@ -44,7 +42,6 @@ public class AuthController {
     @Operation(summary = "닉네임 중복 확인", description = "닉네임이 사용 가능한지 확인합니다.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "닉네임 중복 확인 완료"),
-        @ApiResponse(responseCode = "400", description = "잘못된 닉네임 형식")
     })
     @GetMapping("/check-nickname")
     public ResponseEntity<ResponseDto<Boolean>> checkNickname(
@@ -59,8 +56,6 @@ public class AuthController {
     @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인을 진행합니다.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "로그인 성공"),
-        @ApiResponse(responseCode = "401", description = "이메일 또는 비밀번호가 올바르지 않음"),
-        @ApiResponse(responseCode = "400", description = "잘못된 요청 데이터")
     })
     @PostMapping("/login")
     public ResponseEntity<ResponseDto<LoginResponseDto>> login(
@@ -75,7 +70,6 @@ public class AuthController {
     @Operation(summary = "로그아웃", description = "현재 로그인된 사용자를 로그아웃 처리합니다.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "로그아웃 성공"),
-        @ApiResponse(responseCode = "401", description = "인증되지 않은 사용자")
     })
     @PostMapping("/logout")
     public ResponseEntity<ResponseDto<String>> logout(
