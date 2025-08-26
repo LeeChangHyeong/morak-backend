@@ -99,6 +99,12 @@ public class WebSecurityConfig {
 				.requestMatchers(HttpMethod.GET, apiPrefix + "/users/*/nickname/*").permitAll()
 				.requestMatchers(HttpMethod.GET, apiPrefix + "/users/*").permitAll()
 
+				// Swagger 관련 경로 허용
+				.requestMatchers("/swagger-ui/**").permitAll()
+				.requestMatchers("/swagger-ui.html").permitAll()
+				.requestMatchers("/v3/api-docs/**").permitAll()
+				.requestMatchers("/api-docs/**").permitAll()
+
 				// 나머지 모든 요청은 인증 필요
 				.anyRequest().authenticated()
 			)
