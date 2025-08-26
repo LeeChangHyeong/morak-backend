@@ -26,5 +26,3 @@
 # spring.mail.properties.mail.smtp.auth=
 # spring.mail.properties.mail.smtp.starttls.enable=
 # spring.mail.properties.mail.smtp.starttls.required=
-
-# CI/CD 테스트
