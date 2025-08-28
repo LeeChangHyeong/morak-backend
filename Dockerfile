@@ -26,4 +26,4 @@ EXPOSE 8080
 # 애플리케이션 실행
 ENTRYPOINT ["java", "-jar", "app.jar"]
 
-# 변경 테스트
+# 테스트
