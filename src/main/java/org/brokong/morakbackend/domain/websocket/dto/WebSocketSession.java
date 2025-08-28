@@ -1,1 +1,0 @@
-// 이 파일은 삭제됩니다. 기존 chat.dto.WebSocketSessionDto를 사용하세요.
