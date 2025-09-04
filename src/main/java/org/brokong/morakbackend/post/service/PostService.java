@@ -43,7 +43,7 @@ public class PostService {
 
 		postRepository.save(post);
 
-		return PostResponseDto.from(post);
+		return PostResponseDto.from(post, false); // 새로 작성한 게시글은 좋아요 안 누름
 	}
 
 	@Transactional
@@ -60,22 +60,55 @@ public class PostService {
 		postRepository.deleteById(postId);
 	}
 
+	// 로그인하지 않은 사용자도 조회 가능
+	@Transactional
 	public PostResponseDto getPost(Long postId) {
-
-		Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+		Post post = postRepository.findById(postId)
+								  .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
 
 		post.increaseViewCount();
 		postRepository.save(post);
 
-		return PostResponseDto.from(post);
+		return PostResponseDto.from(post, false);
 	}
 
+	// 로그인한 사용자의 게시글 조회 (좋아요 상태 포함)
+	@Transactional
+	public PostResponseDto getPost(Long postId, UserPrincipal userPrincipal) {
+		Post post = postRepository.findById(postId)
+								  .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+
+		User user = userRepository.findByEmail(userPrincipal.getEmail())
+								  .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+		post.increaseViewCount();
+		postRepository.save(post);
+
+		boolean likedByUser = postLikeRepostory.existsByPostAndUser(post, user);
+
+		return PostResponseDto.from(post, likedByUser);
+	}
+
+	// 로그인하지 않은 사용자도 목록 조회 가능
 	public Page<PostResponseDto> getPostList(int page, int size, SortType sortBy) {
 		Pageable pageable = PageRequest.of(page, size);
-
 		Page<Post> posts = postQueryRepository.findAllWithSorting(pageable, sortBy);
 
-		return posts.map(PostResponseDto::from);
+		return posts.map(post -> PostResponseDto.from(post, false));
+	}
+
+	// 로그인한 사용자의 목록 조회 (좋아요 상태 포함)
+	public Page<PostResponseDto> getPostList(int page, int size, SortType sortBy, UserPrincipal userPrincipal) {
+		User user = userRepository.findByEmail(userPrincipal.getEmail())
+								  .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+		Pageable pageable = PageRequest.of(page, size);
+		Page<Post> posts = postQueryRepository.findAllWithSorting(pageable, sortBy);
+
+		return posts.map(post -> {
+			boolean likedByUser = postLikeRepostory.existsByPostAndUser(post, user);
+			return PostResponseDto.from(post, likedByUser);
+		});
 	}
 
 	@Transactional

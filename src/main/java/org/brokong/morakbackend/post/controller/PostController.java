@@ -66,9 +66,18 @@ public class PostController {
 	@GetMapping("/{postId}")
 	public ResponseEntity<ResponseDto<PostResponseDto>> getPost(
 		@Parameter(description = "조회할 게시글 ID", required = true, example = "1")
-		@PathVariable Long postId) {
+		@PathVariable Long postId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-		PostResponseDto responseDto = postService.getPost(postId);
+		PostResponseDto responseDto;
+
+		if (userPrincipal != null) {
+			// 로그인한 사용자 - 좋아요 상태 포함
+			responseDto = postService.getPost(postId, userPrincipal);
+		} else {
+			// 로그인하지 않은 사용자
+			responseDto = postService.getPost(postId);
+		}
+
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("게시글이 성공적으로 조회되었습니다.", responseDto));
 	}
 
@@ -136,7 +145,15 @@ public class PostController {
 		@RequestParam(defaultValue = "CREATED_AT_DESC") SortType sortBy,
 		@Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-		Page<PostResponseDto> posts = postService.getMyPostList(page - 1, size, sortBy, userPrincipal);
+		Page<PostResponseDto> posts;
+
+		if (userPrincipal != null) {
+			// 로그인한 사용자 - 좋아요 상태 포함
+			posts = postService.getPostList(page - 1, size, sortBy, userPrincipal);
+		} else {
+			// 로그인하지 않은 사용자
+			posts = postService.getPostList(page - 1, size, sortBy);
+		}
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("내 게시글 목록 조회 성공", posts));
 	}
 
