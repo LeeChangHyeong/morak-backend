@@ -208,7 +208,7 @@ public class CommentService {
 
 
 		return replies.map(comment ->
-									CommentResponseDto.from(comment, likedCommentIds.contains(comment.getId()), commentRepository.existsByParentComment(comment)));
+									CommentResponseDto.from(comment, likedCommentIds.contains(comment.getId()), false));
 	}
 
 	public CommentResponseDto getCommentById(Long commentId, UserPrincipal userPrincipal) {
@@ -224,13 +224,12 @@ public class CommentService {
 		User user = userRepository.findByEmail(userPrincipal.getEmail())
 								  .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
-		// 댓글 ID 추출
-		Long commentIds = comment.getId();
-
 		// 로그인 유저가 좋아요 누른 댓글 ID 추출
-		Set<Long> likedCommentIds = commentLikeRepository.findLikedCommentIdsByUser(user);
+		// 수정 후 - 해당 댓글만 체크
+		boolean likedByUser = commentLikeRepository.existsByCommentAndUser(comment, user);
+		boolean hasChildren = commentRepository.existsByParentComment(comment);
 
-		return CommentResponseDto.from(comment, likedCommentIds.contains(commentIds), commentRepository.existsByParentComment(comment));
+		return CommentResponseDto.from(comment, likedByUser, hasChildren);
 	}
 
 	@Transactional

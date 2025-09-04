@@ -23,4 +23,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 	List<Comment> findAllByPostWithUserAndParent(@Param("post") Post post);
 
 	boolean existsByParentComment(Comment parentComment);
+
+	// 배치 조회 메서드 추가 - N+1 해결용
+	@Query("SELECT DISTINCT c.parentComment.id FROM Comment c WHERE c.parentComment.id IN :parentIds")
+	Set<Long> findParentCommentIdsWithChildren(@Param("parentIds") List<Long> parentIds);
 }

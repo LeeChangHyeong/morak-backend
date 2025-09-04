@@ -56,7 +56,6 @@ public class CommentController {
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "댓글 조회 성공")
 	})
-	@SecurityRequirement(name = "bearer-jwt")
 	@GetMapping("/{commentId}")
 	public ResponseEntity<ResponseDto<CommentResponseDto>> getCommentById(
 		@Parameter(description = "조회할 댓글 ID", required = true, example = "1")
@@ -118,7 +117,6 @@ public class CommentController {
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "루트 댓글 조회 성공")
 	})
-	@SecurityRequirement(name = "bearer-jwt")
 	@GetMapping("/root")
 	public ResponseEntity<ResponseDto<Page<CommentResponseDto>>> getRootComments(
 		@Parameter(description = "게시글 ID", required = true, example = "1")
@@ -139,7 +137,6 @@ public class CommentController {
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "대댓글 조회 성공")
 	})
-	@SecurityRequirement(name = "bearer-jwt")
 	@GetMapping("/{parentId}/replies")
 	public ResponseEntity<ResponseDto<Page<CommentResponseDto>>> getReplies(
 		@Parameter(description = "부모 댓글 ID", required = true, example = "1")
