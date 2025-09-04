@@ -69,7 +69,11 @@ public class CommentService {
 
 		commentRepository.save(comment);
 
-		return CommentResponseDto.from(comment, false, false);
+		// 게시글의 댓글 수 증가
+		post.increaseCommentCount();
+		postRepository.save(post);
+
+		return CommentResponseDto.from(comment, false);
 	}
 
 	@Transactional
@@ -88,8 +92,12 @@ public class CommentService {
 		}
 
 		comment.delete();
-
 		commentRepository.save(comment);
+
+		// 게시글의 댓글 수 감소
+		Post post = comment.getPost();
+		post.decreaseCommentCount();
+		postRepository.save(post);
 	}
 
 	@Transactional

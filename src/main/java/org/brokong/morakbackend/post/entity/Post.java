@@ -53,6 +53,9 @@ public class Post extends BaseEntity {
     @Column(nullable = false)
     private Long likeCount = 0L;
 
+    @Column(nullable = false)
+    private Long commentCount = 0L;
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostLike> likes = new ArrayList<>();
 
@@ -69,6 +72,14 @@ public class Post extends BaseEntity {
 
     public void increaseLikeCount() {
         this.likeCount++;
+    }
+
+    public void increaseCommentCount() {
+        this.commentCount++;
+    }
+
+    public void decreaseCommentCount() {
+        this.commentCount--;
     }
 
     public void updateContent(String content) {
