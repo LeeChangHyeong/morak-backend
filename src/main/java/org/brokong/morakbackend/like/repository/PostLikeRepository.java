@@ -1,6 +1,6 @@
 package org.brokong.morakbackend.like.repository;
 
-import io.lettuce.core.dynamic.annotation.Param;
+import org.springframework.data.repository.query.Param;
 import java.util.List;
 import org.brokong.morakbackend.like.entity.PostLike;
 import org.brokong.morakbackend.post.entity.Post;

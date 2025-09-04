@@ -1,6 +1,10 @@
 package org.brokong.morakbackend.post.service;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.security.UserPrincipal;
 import org.brokong.morakbackend.global.enums.SortType;
@@ -28,7 +32,7 @@ public class PostService {
 	private final UserRepository userRepository;
 	private final PostRepository postRepository;
 	private final PostQueryRepository postQueryRepository;
-	private final PostLikeRepository postLikeRepostory;
+	private final PostLikeRepository postLikeRepository;
 	private final PostReportRepository postReportRepository;
 
 	@Transactional
@@ -84,7 +88,7 @@ public class PostService {
 		post.increaseViewCount();
 		postRepository.save(post);
 
-		boolean likedByUser = postLikeRepostory.existsByPostAndUser(post, user);
+		boolean likedByUser = postLikeRepository.existsByPostAndUser(post, user);
 
 		return PostResponseDto.from(post, likedByUser);
 	}
@@ -99,14 +103,31 @@ public class PostService {
 
 	// 로그인한 사용자의 목록 조회 (좋아요 상태 포함)
 	public Page<PostResponseDto> getPostList(int page, int size, SortType sortBy, UserPrincipal userPrincipal) {
+		System.out.println("=== 디버깅: 로그인한 사용자 전체조회 시작");
+
 		User user = userRepository.findByEmail(userPrincipal.getEmail())
 								  .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+		System.out.println("=== 디버깅: 사용자 ID = " + user.getId() + ", 이메일 = " + user.getEmail());
 
 		Pageable pageable = PageRequest.of(page, size);
 		Page<Post> posts = postQueryRepository.findAllWithSorting(pageable, sortBy);
 
+		// 🔥 핵심: 배치로 좋아요 정보 조회
+		List<Long> postIds = posts.getContent().stream()
+								  .map(Post::getId)
+								  .collect(Collectors.toList());
+
+		System.out.println("=== 디버깅: 조회된 게시글 IDs = " + postIds);
+
+		List<Long> likedPostIdsFromDb = postLikeRepository.findLikedPostIdsByUserAndPostIds(user, postIds);
+		System.out.println("=== 디버깅: 좋아요한 게시글 IDs = " + likedPostIdsFromDb);
+
+		Set<Long> likedPostIds = new HashSet<>(likedPostIdsFromDb);
+
 		return posts.map(post -> {
-			boolean likedByUser = postLikeRepostory.existsByPostAndUser(post, user);
+			boolean likedByUser = likedPostIds.contains(post.getId()); // 메모리에서 확인
+			System.out.println("=== 디버깅: 게시글 " + post.getId() + " 좋아요 상태 = " + likedByUser);
 			return PostResponseDto.from(post, likedByUser);
 		});
 	}
@@ -121,10 +142,10 @@ public class PostService {
 		Post post = postRepository.findById(postId).orElseThrow(
 			() -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
 
-		Optional<PostLike> existing = postLikeRepostory.findByPostAndUser(post, user);
+		Optional<PostLike> existing = postLikeRepository.findByPostAndUser(post, user);
 
 		if (existing.isPresent()) { // 이미 좋아요를 눌렀으면
-			postLikeRepostory.delete(existing.get());
+			postLikeRepository.delete(existing.get());
 			post.decreaseLikeCount();
 			postRepository.save(post);
 
@@ -137,7 +158,7 @@ public class PostService {
 
 			post.increaseLikeCount();
 			postRepository.save(post);
-			postLikeRepostory.save(postLike);
+			postLikeRepository.save(postLike);
 
 			return true;
 		}
@@ -145,9 +166,7 @@ public class PostService {
 
 	@Transactional
 	public PostResponseDto updatePost(Long postId, String content, UserPrincipal userPrincipal) {
-
 		Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
-
 		User user = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
 		if (!post.getUser().equals(user)) {
@@ -157,7 +176,9 @@ public class PostService {
 		post.updateContent(content);
 		postRepository.save(post);
 
-		return PostResponseDto.from(post);
+		// 좋아요 상태 포함
+		boolean likedByUser = postLikeRepository.existsByPostAndUser(post, user);
+		return PostResponseDto.from(post, likedByUser);
 	}
 
 	public Page<PostResponseDto> getMyPostList(int page, int size, SortType sortBy, UserPrincipal userPrincipal) {
@@ -166,7 +187,19 @@ public class PostService {
 
 		Page<Post> posts = postQueryRepository.findAllByUserWithSorting(pageable, sortBy, user.getId());
 
-		return posts.map(PostResponseDto::from);
+		// 내 게시글도 좋아요 상태 포함 (배치 조회)
+		List<Long> postIds = posts.getContent().stream()
+								  .map(Post::getId)
+								  .collect(Collectors.toList());
+
+		Set<Long> likedPostIds = new HashSet<>(
+			postLikeRepository.findLikedPostIdsByUserAndPostIds(user, postIds)
+		);
+
+		return posts.map(post -> {
+			boolean likedByUser = likedPostIds.contains(post.getId());
+			return PostResponseDto.from(post, likedByUser);
+		});
 	}
 
 	@Transactional

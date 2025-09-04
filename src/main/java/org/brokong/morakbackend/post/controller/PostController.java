@@ -81,7 +81,7 @@ public class PostController {
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("게시글이 성공적으로 조회되었습니다.", responseDto));
 	}
 
-	@Operation(summary = "게시글 목록 조회", description = "게시글 목록을 페이징하여 조회합니다.")
+	@Operation(summary = "게시글 목록 조회", description = "게시글 목록을 페이징하여 조회합니다. 로그인한 경우 좋아요 상태도 포함됩니다.")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "게시글 목록 조회 성공")
 	})
@@ -92,9 +92,19 @@ public class PostController {
 		@Parameter(description = "페이지 크기", example = "10")
 		@RequestParam(defaultValue = "10") int size,
 		@Parameter(description = "정렬 기준", example = "CREATED_AT_DESC")
-		@RequestParam(defaultValue = "CREATED_AT_DESC") SortType sortBy) {
+		@RequestParam(defaultValue = "CREATED_AT_DESC") SortType sortBy,
+		@Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-		Page<PostResponseDto> posts = postService.getPostList(page - 1, size, sortBy);
+		Page<PostResponseDto> posts;
+		
+		if (userPrincipal != null) {
+			// 로그인한 사용자 - 좋아요 상태 포함
+			posts = postService.getPostList(page - 1, size, sortBy, userPrincipal);
+		} else {
+			// 로그인하지 않은 사용자
+			posts = postService.getPostList(page - 1, size, sortBy);
+		}
+		
 		return ResponseEntity.ok(new ResponseDto<>("게시글 목록 조회 성공", posts));
 	}
 
