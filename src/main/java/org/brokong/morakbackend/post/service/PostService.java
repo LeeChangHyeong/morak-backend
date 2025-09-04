@@ -64,6 +64,9 @@ public class PostService {
 
 		Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
 
+		post.increaseViewCount();
+		postRepository.save(post);
+
 		return PostResponseDto.from(post);
 	}
 
