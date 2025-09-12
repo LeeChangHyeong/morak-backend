@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.response.ResponseDto;
 import org.brokong.morakbackend.user.dto.request.LoginRequestDto;
+import org.brokong.morakbackend.user.dto.request.RefreshTokenRequestDto;
 import org.brokong.morakbackend.user.dto.request.SignupRequestDto;
 import org.brokong.morakbackend.user.dto.response.LoginResponseDto;
 import org.brokong.morakbackend.user.dto.response.UserResponseDto;
@@ -77,5 +78,20 @@ public class AuthController {
         authService.logout(request);
 
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("로그아웃 성공", null));
+    }
+
+    @Operation(summary = "토큰 재발급", description = "RefreshToken을 사용하여 새로운 AccessToken을 발급받습니다.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "토큰 재발급 성공"),
+        @ApiResponse(responseCode = "401", description = "유효하지 않은 RefreshToken")
+    })
+    @PostMapping("/refresh")
+    public ResponseEntity<ResponseDto<LoginResponseDto>> refreshToken(
+        @Parameter(description = "토큰 재발급 요청 정보", required = true)
+        @RequestBody RefreshTokenRequestDto request) {
+
+        LoginResponseDto response = authService.refreshToken(request.getRefreshToken());
+        
+        return ResponseEntity.ok(new ResponseDto<>("토큰 재발급 성공", response));
     }
 }

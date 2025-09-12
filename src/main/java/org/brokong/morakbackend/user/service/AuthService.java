@@ -72,8 +72,8 @@ public class AuthService {
 		// JWT
 		String accessToken = jwtUtil.createAccessToken(user.getEmail(), user.getRole().name(), user.getNickname(), user.getId());
 
-		// RefreshToken 발급 (UUID or JWT 가능)
-		String refreshToken = UUID.randomUUID().toString();
+		// JWT RefreshToken 발급
+		String refreshToken = jwtUtil.createRefreshToken(user.getEmail(), user.getId());
 
 		// Redis 저장 (key: email, value: refreshToken, 유효시간: 14일)
 		redisService.setValue(RedisKey.refreshTokenKey(user.getEmail()), refreshToken, Duration.ofDays(14));
@@ -99,5 +99,47 @@ public class AuthService {
 		} catch (Exception e) {
 			throw new IllegalArgumentException("로그아웃에 실패했습니다. 관리자에게 문의해주세요.");
 		}
+	}
+
+	// 토큰 재발급
+	@Transactional
+	public LoginResponseDto refreshToken(String refreshToken) {
+		// 1. RefreshToken 유효성 검증
+		if (!jwtUtil.validateRefreshToken(refreshToken)) {
+			throw new IllegalArgumentException("유효하지 않은 RefreshToken입니다.");
+		}
+
+		// 2. RefreshToken에서 이메일 추출
+		String email = jwtUtil.getEmailFromRefreshToken(refreshToken);
+
+		// 3. 사용자 조회 (단일 DB 쿼리)
+		User user = userRepository.findByEmail(email)
+			.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+		// 4. 사용자 상태 확인
+		if (user.getStatus() == UserStatus.BLOCKED) {
+			throw new IllegalArgumentException("차단된 사용자입니다.");
+		}
+
+		// 5. Redis에 저장된 RefreshToken과 일치하는지 확인
+		String storedRefreshToken = redisService.getValue(RedisKey.refreshTokenKey(email));
+		if (!refreshToken.equals(storedRefreshToken)) {
+			throw new IllegalArgumentException("유효하지 않은 RefreshToken입니다.");
+		}
+
+		// 6. 새로운 토큰들 생성
+		String newAccessToken = jwtUtil.createAccessToken(
+			user.getEmail(), 
+			user.getRole().name(), 
+			user.getNickname(), 
+			user.getId()
+		);
+
+		String newRefreshToken = jwtUtil.createRefreshToken(user.getEmail(), user.getId());
+
+		// 7. Redis 업데이트
+		redisService.setValue(RedisKey.refreshTokenKey(user.getEmail()), newRefreshToken, Duration.ofDays(14));
+
+		return LoginResponseDto.from(user, newAccessToken, newRefreshToken);
 	}
 }
