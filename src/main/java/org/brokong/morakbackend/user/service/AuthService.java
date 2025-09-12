@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import java.time.Duration;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.brokong.morakbackend.global.jwt.JwtUtil;
 import org.brokong.morakbackend.global.redis.RedisKey;
 import org.brokong.morakbackend.global.redis.RedisService;
@@ -18,6 +19,7 @@ import org.brokong.morakbackend.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -30,6 +32,9 @@ public class AuthService {
 	// local 회원 가입
 	@Transactional
 	public UserResponseDto signUp(String email, String password, String nickname) {
+		// 디버그 로그 추가
+		log.info("회원가입 요청 - 이메일: '{}', 비밀번호: '{}', 닉네임: '{}'", email, password, nickname);
+		
 		// 이메일 중복 확인
 		if (userRepository.existsByEmail(email)) {
 			throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
