@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.brokong.morakbackend.global.response.ResponseDto;
 import org.brokong.morakbackend.user.dto.request.LoginRequestDto;
@@ -33,7 +34,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<ResponseDto<UserResponseDto>> signUp(
         @Parameter(description = "회원가입 요청 정보", required = true)
-        @RequestBody SignupRequestDto request) {
+        @Valid @RequestBody SignupRequestDto request) {
 
         UserResponseDto userResponseDto = authService.signUp(request.getEmail(), request.getPassword(), request.getNickname());
 
