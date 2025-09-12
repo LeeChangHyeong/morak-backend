@@ -30,6 +30,16 @@ public class AuthService {
 	// local 회원 가입
 	@Transactional
 	public UserResponseDto signUp(String email, String password, String nickname) {
+		// 이메일 중복 확인
+		if (userRepository.existsByEmail(email)) {
+			throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+		}
+
+		// 닉네임 중복 확인
+		if (userRepository.existsByNickname(nickname)) {
+			throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+		}
+
 		String encodedPassword = passwordEncoder.encode(password);
 
 		User user = User.builder()
@@ -54,6 +64,11 @@ public class AuthService {
 	// 닉네임 중복 확인
 	public boolean checkNickname(String nickname) {
 		return !userRepository.existsByNickname(nickname); // 중복이 없으면 true 반환
+	}
+
+	// 이메일 중복 확인
+	public boolean checkEmail(String email) {
+		return !userRepository.existsByEmail(email); // 중복이 없으면 true 반환
 	}
 
 	public LoginResponseDto login(String email, String password) {
