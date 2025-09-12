@@ -121,6 +121,10 @@ public class AuthService {
 			throw new IllegalArgumentException("차단된 사용자입니다.");
 		}
 
+		if (user.getStatus() == UserStatus.WITHDRAWN) {
+			throw new IllegalArgumentException("탈퇴한 사용자입니다.");
+		}
+
 		// 5. Redis에 저장된 RefreshToken과 일치하는지 확인
 		String storedRefreshToken = redisService.getValue(RedisKey.refreshTokenKey(email));
 		if (!refreshToken.equals(storedRefreshToken)) {
