@@ -3,9 +3,10 @@ package org.brokong.morakbackend.user.service;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import java.time.Duration;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.brokong.morakbackend.global.enums.ErrorCode;
+import org.brokong.morakbackend.global.exception.CustomException;
 import org.brokong.morakbackend.global.jwt.JwtUtil;
 import org.brokong.morakbackend.global.redis.RedisKey;
 import org.brokong.morakbackend.global.redis.RedisService;
@@ -34,15 +35,15 @@ public class AuthService {
 	public UserResponseDto signUp(String email, String password, String nickname) {
 		// 디버그 로그 추가
 		log.info("회원가입 요청 - 이메일: '{}', 비밀번호: '{}', 닉네임: '{}'", email, password, nickname);
-		
+
 		// 이메일 중복 확인
 		if (userRepository.existsByEmail(email)) {
-			throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
+			throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
 		}
 
 		// 닉네임 중복 확인
 		if (userRepository.existsByNickname(nickname)) {
-			throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+			throw new CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS);
 		}
 
 		String encodedPassword = passwordEncoder.encode(password);
@@ -60,7 +61,8 @@ public class AuthService {
 		try {
 			userRepository.save(user);
 		} catch (Exception e) {
-			throw new IllegalArgumentException("회원가입에 실패했습니다. 관리자에게 문의해주세요.");
+			log.error("회원가입 실패 - 이메일: {}, 에러: {}", email, e.getMessage());
+			throw new CustomException(ErrorCode.DATABASE_ERROR);
 		}
 
 		return UserResponseDto.from(user);
@@ -71,22 +73,27 @@ public class AuthService {
 		return !userRepository.existsByNickname(nickname); // 중복이 없으면 true 반환
 	}
 
-	// 이메일 중복 확인
-	public boolean checkEmail(String email) {
-		return !userRepository.existsByEmail(email); // 중복이 없으면 true 반환
-	}
-
 	public LoginResponseDto login(String email, String password) {
 
 		User user = userRepository.findByEmail(email)
-								  .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 이메일입니다."));
+								  .orElseThrow(() -> {
+									  log.warn("로그인 실패 - 존재하지 않는 이메일: {}", email);
+									  return new CustomException(ErrorCode.INVALID_CREDENTIALS);
+								  });
 
 		if (!passwordEncoder.matches(password, user.getPassword())) {
-			throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+			log.warn("로그인 실패 - 비밀번호 불일치: {}", email);
+			throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
 		}
 
 		if (user.getStatus() == UserStatus.BLOCKED) {
-			throw new IllegalArgumentException("차단된 사용자입니다. 관리자에게 문의해주세요.");
+			log.warn("로그인 실패 - 차단된 사용자: {}", email);
+			throw new CustomException(ErrorCode.ACCOUNT_SUSPENDED);
+		}
+
+		if (user.getStatus() == UserStatus.WITHDRAWN) {
+			log.warn("로그인 실패 - 탈퇴한 사용자: {}", email);
+			throw new CustomException(ErrorCode.ACCOUNT_DELETED);
 		}
 
 		// JWT
@@ -96,9 +103,11 @@ public class AuthService {
 		String refreshToken = jwtUtil.createRefreshToken(user.getEmail(), user.getId());
 
 		// Redis 저장 (key: email, value: refreshToken, 유효시간: 14일)
-		redisService.setValue(RedisKey.refreshTokenKey(user.getEmail()), refreshToken, Duration.ofDays(14));
-
-
+		try {
+			redisService.setValue(RedisKey.refreshTokenKey(user.getEmail()), refreshToken, Duration.ofDays(14));
+		} catch (Exception e) {
+			log.error("Redis 저장 실패 - 이메일: {}, 에러: {}", email, e.getMessage());
+		}
 
 		return LoginResponseDto.from(user, accessToken, refreshToken);
 	}
@@ -106,18 +115,28 @@ public class AuthService {
 	public void logout(HttpServletRequest request) {
 		String accessToken = jwtUtil.extractAccessToken(request);
 
-		if (accessToken == null || !jwtUtil.validateAccessToken(accessToken)) {
-			throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+		// 토큰 존재 여부 확인
+		if (accessToken == null) {
+			throw new CustomException(ErrorCode.TOKEN_INVALID);
+		}
+
+		// 토큰 유효성 검증
+		if (!jwtUtil.validateAccessToken(accessToken)) {
+			throw new CustomException(ErrorCode.TOKEN_INVALID);
 		}
 
 		long expiration = jwtUtil.getAccessTokenExpireTime(accessToken);
 		String email = jwtUtil.getEmailFromAccessToken(accessToken);
 
 		try {
+			// 엑세스 토큰 블랙리스트 추가
 			redisService.setValue(RedisKey.accessTokenBlacklistKey(accessToken), "logout", Duration.ofMillis(expiration));
 			redisService.deleteValue(RedisKey.refreshTokenKey(email));
+
+			log.info("로그아웃 성공 - 이메일: {}", email);
 		} catch (Exception e) {
-			throw new IllegalArgumentException("로그아웃에 실패했습니다. 관리자에게 문의해주세요.");
+			log.error("로그아웃 실패 - 이메일: {}, 에러: {}", email, e.getMessage());
+			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -126,44 +145,74 @@ public class AuthService {
 	public LoginResponseDto refreshToken(String refreshToken) {
 		// 1. RefreshToken 유효성 검증
 		if (!jwtUtil.validateRefreshToken(refreshToken)) {
-			throw new IllegalArgumentException("유효하지 않은 RefreshToken입니다.");
+			log.warn("토큰 재발급 실패 - 유효하지 않은 RefreshToken");
+			throw new CustomException(ErrorCode.TOKEN_INVALID);
 		}
 
 		// 2. RefreshToken에서 이메일 추출
-		String email = jwtUtil.getEmailFromRefreshToken(refreshToken);
+		String email;
+		try {
+			email = jwtUtil.getEmailFromRefreshToken(refreshToken);
+		} catch (Exception e) {
+			log.warn("토큰 재발급 실패 - RefreshToken에서 이메일 추출 실패");
+			throw new CustomException(ErrorCode.TOKEN_INVALID);
+		}
 
-		// 3. 사용자 조회 (단일 DB 쿼리)
+		// 3. 사용자 조회
 		User user = userRepository.findByEmail(email)
-			.orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+								  .orElseThrow(() -> {
+									  log.warn("토큰 재발급 실패 - 존재하지 않는 사용자: {}", email);
+									  return new CustomException(ErrorCode.USER_NOT_FOUND);
+								  });
 
 		// 4. 사용자 상태 확인
 		if (user.getStatus() == UserStatus.BLOCKED) {
-			throw new IllegalArgumentException("차단된 사용자입니다.");
+			log.warn("토큰 재발급 실패 - 차단된 사용자: {}", email);
+			throw new CustomException(ErrorCode.ACCOUNT_SUSPENDED);
 		}
 
 		if (user.getStatus() == UserStatus.WITHDRAWN) {
-			throw new IllegalArgumentException("탈퇴한 사용자입니다.");
+			log.warn("토큰 재발급 실패 - 탈퇴한 사용자: {}", email);
+			throw new CustomException(ErrorCode.ACCOUNT_DELETED);
 		}
 
 		// 5. Redis에 저장된 RefreshToken과 일치하는지 확인
-		String storedRefreshToken = redisService.getValue(RedisKey.refreshTokenKey(email));
+		String storedRefreshToken;
+		try {
+			storedRefreshToken = redisService.getValue(RedisKey.refreshTokenKey(email));
+		} catch (Exception e) {
+			log.error("Redis 조회 실패 - 이메일: {}", email);
+			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
+
 		if (!refreshToken.equals(storedRefreshToken)) {
-			throw new IllegalArgumentException("유효하지 않은 RefreshToken입니다.");
+			log.warn("토큰 재발급 실패 - RefreshToken 불일치: {}", email);
+			throw new CustomException(ErrorCode.TOKEN_INVALID);
 		}
 
 		// 6. 새로운 토큰들 생성
 		String newAccessToken = jwtUtil.createAccessToken(
-			user.getEmail(), 
-			user.getRole().name(), 
-			user.getNickname(), 
+			user.getEmail(),
+			user.getRole().name(),
+			user.getNickname(),
 			user.getId()
 		);
 
 		String newRefreshToken = jwtUtil.createRefreshToken(user.getEmail(), user.getId());
 
 		// 7. Redis 업데이트
-		redisService.setValue(RedisKey.refreshTokenKey(user.getEmail()), newRefreshToken, Duration.ofDays(14));
+		try {
+			redisService.setValue(
+				RedisKey.refreshTokenKey(user.getEmail()),
+				newRefreshToken,
+				Duration.ofDays(14)
+			);
+		} catch (Exception e) {
+			log.error("토큰 재발급 시 Redis 업데이트 실패 - 이메일: {}", email);
+			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
 
+		log.info("토큰 재발급 성공 - 이메일: {}", email);
 		return LoginResponseDto.from(user, newAccessToken, newRefreshToken);
 	}
 }

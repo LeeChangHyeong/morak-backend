@@ -54,7 +54,9 @@ public class AuthController {
 
         boolean isAvailable = authService.checkNickname(nickname);
 
-        return ResponseEntity.ok(new ResponseDto<>("닉네임 사용 가능 여부", isAvailable));
+        return ResponseEntity.ok(
+            ResponseDto.success("닉네임 사용 가능 여부", isAvailable)
+        );
     }
 
     @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인을 진행합니다.")
@@ -68,7 +70,9 @@ public class AuthController {
 
         LoginResponseDto loginResponseDto = authService.login(request.getEmail(), request.getPassword());
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("로그인 성공", loginResponseDto));
+        return ResponseEntity.ok(
+            ResponseDto.success("로그인 성공", loginResponseDto)
+        );
     }
 
     @Operation(summary = "로그아웃", description = "현재 로그인된 사용자를 로그아웃 처리합니다.")
@@ -80,7 +84,9 @@ public class AuthController {
         @Parameter(hidden = true) HttpServletRequest request) {
         authService.logout(request);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("로그아웃 성공", null));
+        return ResponseEntity.ok(
+            ResponseDto.success("로그아웃 성공", null)
+        );
     }
 
     @Operation(summary = "토큰 재발급", description = "RefreshToken을 사용하여 새로운 AccessToken을 발급받습니다.")
@@ -94,7 +100,9 @@ public class AuthController {
         @RequestBody RefreshTokenRequestDto request) {
 
         LoginResponseDto response = authService.refreshToken(request.getRefreshToken());
-        
-        return ResponseEntity.ok(new ResponseDto<>("토큰 재발급 성공", response));
+
+        return ResponseEntity.ok(
+            ResponseDto.success("토큰 재발급 성공", response)
+        );
     }
 }
