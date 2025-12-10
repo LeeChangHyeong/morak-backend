@@ -47,7 +47,7 @@ public class PostService {
 
 		postRepository.save(post);
 
-		return PostResponseDto.from(post, false); // 새로 작성한 게시글은 좋아요 안 누름
+		return PostResponseDto.from(post, false, true); // 새로 작성한 게시글은 좋아요 안 누름
 	}
 
 	@Transactional
@@ -73,7 +73,7 @@ public class PostService {
 		post.increaseViewCount();
 		postRepository.save(post);
 
-		return PostResponseDto.from(post, false);
+		return PostResponseDto.from(post);
 	}
 
 	// 로그인한 사용자의 게시글 조회 (좋아요 상태 포함)
@@ -89,8 +89,9 @@ public class PostService {
 		postRepository.save(post);
 
 		boolean likedByUser = postLikeRepository.existsByPostAndUser(post, user);
+		boolean wroteByUser = post.getUser().equals(user);
 
-		return PostResponseDto.from(post, likedByUser);
+		return PostResponseDto.from(post, likedByUser, wroteByUser);
 	}
 
 	// 로그인하지 않은 사용자도 목록 조회 가능
@@ -98,7 +99,7 @@ public class PostService {
 		Pageable pageable = PageRequest.of(page, size);
 		Page<Post> posts = postQueryRepository.findAllWithSorting(pageable, sortBy);
 
-		return posts.map(post -> PostResponseDto.from(post, false));
+		return posts.map(post -> PostResponseDto.from(post));
 	}
 
 	// 로그인한 사용자의 목록 조회 (좋아요 상태 포함)
@@ -127,8 +128,9 @@ public class PostService {
 
 		return posts.map(post -> {
 			boolean likedByUser = likedPostIds.contains(post.getId()); // 메모리에서 확인
-			System.out.println("=== 디버깅: 게시글 " + post.getId() + " 좋아요 상태 = " + likedByUser);
-			return PostResponseDto.from(post, likedByUser);
+			boolean wroteByUser = post.getUser().getId().equals(user.getId());
+			System.out.println("=== 디버깅: 게시글 " + post.getId() + " 좋아요 상태 = " + likedByUser + ", 작성자 여부 = " + wroteByUser);
+			return PostResponseDto.from(post, likedByUser, wroteByUser);
 		});
 	}
 
@@ -178,7 +180,9 @@ public class PostService {
 
 		// 좋아요 상태 포함
 		boolean likedByUser = postLikeRepository.existsByPostAndUser(post, user);
-		return PostResponseDto.from(post, likedByUser);
+		boolean wroteByUser = post.getUser().equals(user);
+
+		return PostResponseDto.from(post, likedByUser, wroteByUser);
 	}
 
 	public Page<PostResponseDto> getMyPostList(int page, int size, SortType sortBy, UserPrincipal userPrincipal) {
@@ -198,7 +202,8 @@ public class PostService {
 
 		return posts.map(post -> {
 			boolean likedByUser = likedPostIds.contains(post.getId());
-			return PostResponseDto.from(post, likedByUser);
+			boolean wroteByUser = post.getUser().equals(user);
+			return PostResponseDto.from(post, likedByUser, wroteByUser);
 		});
 	}
 
