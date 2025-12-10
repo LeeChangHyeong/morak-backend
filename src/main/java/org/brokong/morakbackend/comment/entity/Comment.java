@@ -21,6 +21,8 @@ import org.brokong.morakbackend.global.entity.BaseEntity;
 import org.brokong.morakbackend.like.entity.CommentLike;
 import org.brokong.morakbackend.post.entity.Post;
 import org.brokong.morakbackend.user.entity.User;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @RequiredArgsConstructor
@@ -37,6 +39,7 @@ public class Comment extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)  // ✅ Post 삭제 시 Comment도 자동 삭제
     private Post post;
 
     @ManyToOne(fetch = FetchType.LAZY)
