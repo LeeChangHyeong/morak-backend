@@ -83,7 +83,7 @@ public class PostQueryRepository {
 				// 오래된 순 정렬
 				query.orderBy(post.createdAt.asc());
 				break;
-			case CREATED_AT_DESC: // 최순 순
+			case CREATED_AT_DESC: // 최신 순
 			default:
 				// 기본적으로 createdAt으로 정렬
 				query.orderBy(post.createdAt.desc());

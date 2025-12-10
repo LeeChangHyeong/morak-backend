@@ -83,7 +83,8 @@ public class WebSecurityConfig {
 					apiPrefix + "/auth/login",
 					apiPrefix + "/auth/check-nickname",
 					apiPrefix + "/auth/check-email",
-					apiPrefix + "/email/**"
+					apiPrefix + "/email/**",
+					apiPrefix + "/auth/refresh"
 				).permitAll()
 				
 				// WebSocket 경로 허용 (SockJS 포함)
