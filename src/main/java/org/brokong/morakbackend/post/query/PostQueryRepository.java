@@ -79,6 +79,11 @@ public class PostQueryRepository {
 				// viewCount로 정렬 후 같으면 createdAt으로 정렬
 				query.orderBy(post.viewCount.desc(), post.createdAt.desc());
 				break;
+			case CREATED_AT_ASC:
+				// 오래된 순 정렬
+				query.orderBy(post.createdAt.asc());
+				break;
+			case CREATED_AT_DESC: // 최순 순
 			default:
 				// 기본적으로 createdAt으로 정렬
 				query.orderBy(post.createdAt.desc());
