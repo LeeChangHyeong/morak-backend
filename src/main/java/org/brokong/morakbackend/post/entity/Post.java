@@ -17,7 +17,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 @Entity
 // modifiedAt은 Post에서 수동 관리
-@EntityListeners({})
+@EntityListeners({AuditingEntityListener.class})
 @Table(indexes = {
     // 1. 전체 게시글 - 시간순 정렬 (가장 기본적인 쿼리)
     @Index(name = "idx_post_created_at", columnList = "created_at"),
@@ -72,6 +72,13 @@ public class Post extends BaseEntity {
     public Post(User user, String content) {
         this.user = user;
         this.content = content;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.modifiedAt == null) {
+            this.modifiedAt = LocalDateTime.now();
+        }
     }
 
     public void decreaseLikeCount() {
