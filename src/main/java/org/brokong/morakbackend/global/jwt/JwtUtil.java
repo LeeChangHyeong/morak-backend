@@ -21,7 +21,7 @@ public class JwtUtil {
 	@Value("${jwt.secret}")
 	private String secretKey;
 
-	private final long accessTokenExpireTime = 1000 * 60 * 60; // 토큰 만료 1시간
+	private final long accessTokenExpireTime = 1000 * 60 * 10; // 토큰 만료 10분
 	private final long refreshTokenExpireTime = 1000 * 60 * 60 * 24 * 14; // 리프레시 토큰 만료 14일
 
 	// AccessToken 생성
