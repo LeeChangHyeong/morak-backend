@@ -1,5 +1,7 @@
 package org.brokong.morakbackend.comment.dto;
 
+import static org.brokong.morakbackend.global.DateTimeFormatters.MORAK_DATETIME_FORMATTER;
+
 import lombok.Getter;
 import org.brokong.morakbackend.comment.entity.Comment;
 
@@ -37,8 +39,8 @@ public class CommentResponseDto {
 		dto.isDeleted = comment.isDeleted();
 		dto.likeCount = comment.getLikeCount();
 		dto.likedByLoginUser = likedByLoginUser;
-		dto.createdAt = comment.getCreatedAt().toString();
-		dto.modifiedAt = comment.getModifiedAt().toString();
+		dto.createdAt = comment.getCreatedAt().format(MORAK_DATETIME_FORMATTER);
+		dto.modifiedAt = comment.getModifiedAt().format(MORAK_DATETIME_FORMATTER);
 		dto.hasChildren = hasChildren;
 
 		return dto;

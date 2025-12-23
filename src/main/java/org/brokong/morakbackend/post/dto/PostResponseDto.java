@@ -1,5 +1,7 @@
 package org.brokong.morakbackend.post.dto;
 
+import static org.brokong.morakbackend.global.DateTimeFormatters.MORAK_DATETIME_FORMATTER;
+
 import lombok.Getter;
 import org.brokong.morakbackend.post.entity.Post;
 
@@ -30,8 +32,8 @@ public class PostResponseDto {
         dto.nickname = post.getUser().getNickname();
         dto.likeCount = post.getLikeCount();
         dto.viewCount = post.getViewCount();
-        dto.createdAt = post.getCreatedAt().toString();
-        dto.modifiedAt = post.getModifiedAt().toString();
+        dto.createdAt = post.getCreatedAt().format(MORAK_DATETIME_FORMATTER);
+        dto.modifiedAt = post.getModifiedAt().format(MORAK_DATETIME_FORMATTER);
         dto.likedByLoginUser = likedByLoginUser;
         dto.wroteByLoginUser = wroteByLoginUser;
         dto.commentCount = post.getCommentCount();

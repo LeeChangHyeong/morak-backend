@@ -1,5 +1,7 @@
 package org.brokong.morakbackend.friend.dto.response;
 
+import static org.brokong.morakbackend.global.DateTimeFormatters.MORAK_DATETIME_FORMATTER;
+
 import lombok.Builder;
 import lombok.Getter;
 import org.brokong.morakbackend.friend.entity.FriendRequest;
@@ -29,7 +31,7 @@ public class FriendRequestResponseDto {
                 .receiverNickname(friendRequest.getReceiver().getNickname())
                 .receiverEmail(friendRequest.getReceiver().getEmail())
                 .status(friendRequest.getFriendRequestStatus())
-                .createdAt(friendRequest.getCreatedAt().toString())
+                .createdAt(friendRequest.getCreatedAt().format(MORAK_DATETIME_FORMATTER))
                 .build();
     }
 }
