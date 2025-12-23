@@ -72,7 +72,6 @@ public class Post extends BaseEntity {
     public Post(User user, String content) {
         this.user = user;
         this.content = content;
-        this.modifiedAt = LocalDateTime.now();
     }
 
     public void decreaseLikeCount() {
