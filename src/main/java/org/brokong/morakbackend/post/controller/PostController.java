@@ -155,15 +155,8 @@ public class PostController {
 		@RequestParam(defaultValue = "CREATED_AT_DESC") SortType sortBy,
 		@Parameter(hidden = true) @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-		Page<PostResponseDto> posts;
+		Page<PostResponseDto> posts = postService.getMyPostList(page - 1, size, sortBy, userPrincipal);
 
-		if (userPrincipal != null) {
-			// 로그인한 사용자 - 좋아요 상태 포함
-			posts = postService.getPostList(page - 1, size, sortBy, userPrincipal);
-		} else {
-			// 로그인하지 않은 사용자
-			posts = postService.getPostList(page - 1, size, sortBy);
-		}
 		return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>("내 게시글 목록 조회 성공", posts));
 	}
 
