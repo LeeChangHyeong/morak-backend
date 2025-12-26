@@ -30,7 +30,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Getter
 @RequiredArgsConstructor
 @Entity
-@EntityListeners(AuditingEntityListener.class)  // 👈 추가!
+@EntityListeners(AuditingEntityListener.class)
 @Table(indexes = {
     @Index(name = "idx_parent_comment_id", columnList = "parent_comment_id")
 })
@@ -77,6 +77,7 @@ public class Comment extends BaseEntity {
         this.parentComment = parentComment;
         this.content = content;
         this.likeCount = likeCount;
+        this.modifiedAt = LocalDateTime.now();
     }
 
     public void delete() {
