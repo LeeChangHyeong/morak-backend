@@ -31,8 +31,9 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
 	// 클라이언트가 메시지를 구독할 때와 메시지를 보낼 때의 경로를 설정
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry config) {
-		// 메시지 구독 경로 설정
-		config.enableSimpleBroker("/sub");
+		// 메시지 구독 경로 설정 + 하트비트 설정
+		config.enableSimpleBroker("/sub")
+				.setHeartbeatValue(new long[] {10000, 10000}); // 10초마다 서버↔클라이언트 핑퐁
 
 		// 클라이언트에서 메시지 보낼때 사용하는 경로
 		config.setApplicationDestinationPrefixes("/pub");
@@ -40,6 +41,7 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
 		log.info("STOMP 메시지 브로커 설정 완료");
 		log.info("구독 경로: /sub");
 		log.info("메시지 보내는 경로: /pub");
+		log.info("하트비트 설정: 10초");
 	}
 
 	// 클라이언트가 웹소켓에 연결할 때 사용할 엔드포인트
