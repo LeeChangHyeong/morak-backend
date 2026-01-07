@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.brokong.morakbackend.chat.service.WebSocketSessionService;
 import org.brokong.morakbackend.global.jwt.JwtUtil;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -14,6 +15,8 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
@@ -27,13 +30,24 @@ public class WebSocketStompConfig implements WebSocketMessageBrokerConfigurer {
 	private final JwtUtil jwtUtil;
 	private final WebSocketSessionService webSocketSessionService;
 
+	// TaskScheduler 빈 추가
+	@Bean
+	public TaskScheduler heartBeatScheduler() {
+		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+		scheduler.setPoolSize(1);
+		scheduler.setThreadNamePrefix("ws-heartbeat-");
+		scheduler.initialize();
+		return scheduler;
+	}
+
 	// 메시지 브로커 설정
 	// 클라이언트가 메시지를 구독할 때와 메시지를 보낼 때의 경로를 설정
 	@Override
 	public void configureMessageBroker(MessageBrokerRegistry config) {
 		// 메시지 구독 경로 설정 + 하트비트 설정
 		config.enableSimpleBroker("/sub")
-				.setHeartbeatValue(new long[] {10000, 10000}); // 10초마다 서버↔클라이언트 핑퐁
+				.setHeartbeatValue(new long[] {10000, 10000})
+				.setTaskScheduler(heartBeatScheduler()); // 10초마다 서버↔클라이언트 핑퐁
 
 		// 클라이언트에서 메시지 보낼때 사용하는 경로
 		config.setApplicationDestinationPrefixes("/pub");
