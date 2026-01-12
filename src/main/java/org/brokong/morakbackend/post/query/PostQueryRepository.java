@@ -43,6 +43,40 @@ public class PostQueryRepository {
 		return new PageImpl<>(posts, pageable, total != null ? total : 0L);
 	}
 
+	// 차단한 사용자의 게시글을 제외한 전체 게시글 조회
+	public Page<Post> findAllWithSortingExcludingBlockedUsers(Pageable pageable, SortType sortBy, List<Long> blockedUserIds) {
+		QPost post = QPost.post;
+
+		JPAQuery<Post> query = jpaQueryFactory
+			.selectFrom(post)
+			.leftJoin(post.user).fetchJoin();
+
+		// 차단한 사용자의 게시글 제외
+		if (blockedUserIds != null && !blockedUserIds.isEmpty()) {
+			query.where(post.user.id.notIn(blockedUserIds));
+		}
+
+		applySorting(query, post, sortBy);
+
+		List<Post> posts = query
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize())
+			.fetch();
+
+		// 전체 게시글 수 조회 - 차단 제외
+		JPAQuery<Long> countQuery = jpaQueryFactory
+			.select(post.count())
+			.from(post);
+
+		if (blockedUserIds != null && !blockedUserIds.isEmpty()) {
+			countQuery.where(post.user.id.notIn(blockedUserIds));
+		}
+
+		Long total = countQuery.fetchOne();
+
+		return new PageImpl<>(posts, pageable, total != null ? total : 0L);
+	}
+
 	public Page<Post> findAllByUserWithSorting(Pageable pageable, SortType sortBy, Long userId) {
 		QPost post = QPost.post;
 		QUser user = QUser.user;

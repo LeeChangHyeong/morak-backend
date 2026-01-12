@@ -19,6 +19,7 @@ import org.brokong.morakbackend.report.entity.PostReport;
 import org.brokong.morakbackend.report.repository.PostReportRepository;
 import org.brokong.morakbackend.user.entity.User;
 import org.brokong.morakbackend.user.repository.UserRepository;
+import org.brokong.morakbackend.friend.repository.BlockRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +35,7 @@ public class PostService {
 	private final PostQueryRepository postQueryRepository;
 	private final PostLikeRepository postLikeRepository;
 	private final PostReportRepository postReportRepository;
+	private final BlockRepository blockRepository;
 
 	@Transactional
 	public PostResponseDto createPost(String content, UserPrincipal userPrincipal) {
@@ -76,7 +78,7 @@ public class PostService {
 		return PostResponseDto.from(post);
 	}
 
-	// 로그인한 사용자의 게시글 조회 (좋아요 상태 포함)
+	// 로그인한 사용자의 게시글 조회 (좋아요 상태 포함, 차단한 사용자 게시글 접근 차단)
 	@Transactional
 	public PostResponseDto getPost(Long postId, UserPrincipal userPrincipal) {
 		Post post = postRepository.findById(postId)
@@ -84,6 +86,12 @@ public class PostService {
 
 		User user = userRepository.findByEmail(userPrincipal.getEmail())
 								  .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+		// 차단한 사용자의 게시글인지 확인
+		boolean isBlocked = blockRepository.existsByBlockerAndBlocked(user, post.getUser());
+		if (isBlocked) {
+			throw new IllegalArgumentException("차단한 사용자의 게시글입니다.");
+		}
 
 		post.increaseViewCount();
 		postRepository.save(post);
@@ -102,7 +110,7 @@ public class PostService {
 		return posts.map(post -> PostResponseDto.from(post));
 	}
 
-	// 로그인한 사용자의 목록 조회 (좋아요 상태 포함)
+	// 로그인한 사용자의 목록 조회 (좋아요 상태 포함, 차단한 사용자 게시글 제외)
 	public Page<PostResponseDto> getPostList(int page, int size, SortType sortBy, UserPrincipal userPrincipal) {
 		System.out.println("=== 디버깅: 로그인한 사용자 전체조회 시작");
 
@@ -111,8 +119,13 @@ public class PostService {
 
 		System.out.println("=== 디버깅: 사용자 ID = " + user.getId() + ", 이메일 = " + user.getEmail());
 
+		// 내가 차단한 사용자들의 ID 목록 조회
+		List<Long> blockedUserIds = blockRepository.findBlockedUserIdsByBlockerId(user.getId());
+		System.out.println("=== 디버깅: 차단한 사용자 IDs = " + blockedUserIds);
+
 		Pageable pageable = PageRequest.of(page, size);
-		Page<Post> posts = postQueryRepository.findAllWithSorting(pageable, sortBy);
+		// 차단한 사용자 게시글 제외하고 조회
+		Page<Post> posts = postQueryRepository.findAllWithSortingExcludingBlockedUsers(pageable, sortBy, blockedUserIds);
 
 		// 🔥 핵심: 배치로 좋아요 정보 조회
 		List<Long> postIds = posts.getContent().stream()
@@ -213,7 +226,7 @@ public class PostService {
 		User user = userRepository.findByEmail(userPrincipal.getEmail()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 		Post post = postRepository.findByIdWithUser(postId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
 
-		if(postReportRepository.existsByPostAndUser(post, user)) {
+		if (postReportRepository.existsByPostAndUser(post, user)) {
 			throw new IllegalArgumentException("이미 신고한 게시글입니다.");
 		}
 
