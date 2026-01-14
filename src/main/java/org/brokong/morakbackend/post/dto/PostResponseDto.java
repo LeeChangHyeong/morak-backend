@@ -8,6 +8,7 @@ import org.brokong.morakbackend.post.entity.Post;
 @Getter
 public class PostResponseDto {
     private Long id;
+    private Long writerId;
     private String content;
     private String nickname;
     private Long likeCount;
@@ -28,6 +29,7 @@ public class PostResponseDto {
         PostResponseDto dto = new PostResponseDto();
 
         dto.id = post.getId();
+        dto.writerId = post.getUser().getId();
         dto.content = post.getContent();
         dto.nickname = post.getUser().getNickname();
         dto.likeCount = post.getLikeCount();
