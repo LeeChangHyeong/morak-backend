@@ -26,6 +26,25 @@ public class CommentResponseDto {
 		return from(comment, false, hasChildren);
 	}
 
+	// 차단된 사용자 일때
+	public static CommentResponseDto fromBlocked(Comment comment, boolean hasChildren) {
+		CommentResponseDto dto = new CommentResponseDto();
+		dto.id = comment.getId();
+		dto.content = "차단된 사용자의 댓글입니다.";
+		dto.nickname = "[차단된 사용자]";
+		dto.userId = comment.getUser().getId();
+		dto.postId = comment.getPost().getId();
+		dto.parentId = comment.getParentComment() != null ? comment.getParentComment().getId() : null;
+		dto.isDeleted = comment.isDeleted();
+		dto.likeCount = comment.getLikeCount();
+		dto.likedByLoginUser = false;
+		dto.createdAt = comment.getCreatedAt().format(MORAK_DATETIME_FORMATTER);
+		dto.modifiedAt = comment.getModifiedAt().format(MORAK_DATETIME_FORMATTER);
+		dto.hasChildren = hasChildren;
+
+		return dto;
+	}
+
 	// 로그인 사용자 있을 때 (좋아요 상태 포함)
 	public static CommentResponseDto from(Comment comment, boolean likedByLoginUser, boolean hasChildren) {
 		CommentResponseDto dto = new CommentResponseDto();

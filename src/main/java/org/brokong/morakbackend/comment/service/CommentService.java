@@ -1,5 +1,6 @@
 package org.brokong.morakbackend.comment.service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -11,6 +12,7 @@ import org.brokong.morakbackend.comment.dto.CommentUpdateRequestDto;
 import org.brokong.morakbackend.comment.entity.Comment;
 import org.brokong.morakbackend.comment.query.CommentQueryRepository;
 import org.brokong.morakbackend.comment.repository.CommentRepository;
+import org.brokong.morakbackend.friend.repository.BlockRepository;
 import org.brokong.morakbackend.global.security.UserPrincipal;
 import org.brokong.morakbackend.global.enums.SortType;
 import org.brokong.morakbackend.global.request.ReportRequestDto;
@@ -38,6 +40,7 @@ public class CommentService {
 	private final CommentLikeRepository commentLikeRepository;
 	private final CommentQueryRepository commentQueryRepository;
 	private final CommentReportRepository commentReportRepository;
+	private final BlockRepository blockRepository;
 
 	@Transactional
 	public CommentResponseDto createComment(CommentRequestDto request, UserPrincipal userPrincipal) {
@@ -174,7 +177,11 @@ public class CommentService {
 
 		// 로그인 유저면
 		User user = userRepository.findByEmail(userPrincipal.getEmail())
-			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+								  .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+		// 차단한 사용자 ID 목록 조회
+		List<Long> blockedUserIds = blockRepository.findBlockedUserIdsByBlockerId(user.getId());
+		Set<Long> blockedUserIdsSet = new HashSet<>(blockedUserIds);
 
 		List<Long> commentIds = rootComments.getContent().stream()
 											.map(Comment::getId)
@@ -184,12 +191,21 @@ public class CommentService {
 		Set<Long> likedCommentIds = commentLikeRepository
 			.findLikedCommentIdsByCommentIdsAndUser(commentIds, user);
 
-		return rootComments.map(comment ->
-									CommentResponseDto.from(
-										comment,
-										likedCommentIds.contains(comment.getId()),
-										commentRepository.existsByParentComment(comment)
-									));
+		return rootComments.map(comment -> {
+			// 차단된 사용자의 댓글인지 확인
+			boolean isBlockedUser = blockedUserIdsSet.contains(comment.getUser().getId());
+
+			if (isBlockedUser) {
+				// 차단된 사용자의 댓글은 내용을 마스킹
+				return CommentResponseDto.fromBlocked(comment, commentRepository.existsByParentComment(comment));
+			}
+
+			return CommentResponseDto.from(
+				comment,
+				likedCommentIds.contains(comment.getId()),
+				commentRepository.existsByParentComment(comment)
+			);
+		});
 	}
 
 	public Page<CommentResponseDto> getReplies(Long parentId, int page, int size, UserPrincipal userPrincipal) {
@@ -206,17 +222,28 @@ public class CommentService {
 		User user = userRepository.findByEmail(userPrincipal.getEmail())
 								  .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
+		// 차단한 사용자 ID 목록 조회
+		List<Long> blockedUserIds = blockRepository.findBlockedUserIdsByBlockerId(user.getId());
+		Set<Long> blockedUserIdsSet = new HashSet<>(blockedUserIds);
+
 		// 댓글 ID 추출
 		List<Long> commentIds = replies.getContent().stream()
-											.map(Comment::getId)
-											.toList();
+									   .map(Comment::getId)
+									   .toList();
 
 		// N+1 해결: 이미 최적화된 메서드 사용
 		Set<Long> likedCommentIds = commentLikeRepository.findLikedCommentIdsByCommentIdsAndUser(commentIds, user);
 
+		return replies.map(comment -> {
+			// 차단된 사용자의 댓글인지 확인
+			boolean isBlockedUser = blockedUserIdsSet.contains(comment.getUser().getId());
 
-		return replies.map(comment ->
-									CommentResponseDto.from(comment, likedCommentIds.contains(comment.getId()), false));
+			if (isBlockedUser) {
+				return CommentResponseDto.fromBlocked(comment, false);
+			}
+
+			return CommentResponseDto.from(comment, likedCommentIds.contains(comment.getId()), false);
+		});
 	}
 
 	public CommentResponseDto getCommentById(Long commentId, UserPrincipal userPrincipal) {
@@ -231,6 +258,13 @@ public class CommentService {
 		// 로그인 유저면
 		User user = userRepository.findByEmail(userPrincipal.getEmail())
 								  .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+		// 차단한 사용자의 댓글인지 확인
+		boolean isBlocked = blockRepository.existsByBlockerAndBlocked(user, comment.getUser());
+		if (isBlocked) {
+			boolean hasChildren = commentRepository.existsByParentComment(comment);
+			return CommentResponseDto.fromBlocked(comment, hasChildren);
+		}
 
 		// 로그인 유저가 좋아요 누른 댓글 ID 추출
 		// 수정 후 - 해당 댓글만 체크
