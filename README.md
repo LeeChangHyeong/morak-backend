@@ -13,35 +13,35 @@ Morak-Backend는 실시간 상호작용과 소셜 네트워킹에 초점을 맞�
 ```mermaid
 graph TD
     subgraph Client
-        A[Web/Mobile App]
+        A["Web/Mobile App"]
     end
 
     subgraph "CI/CD Pipeline"
-        H(GitHub Actions - Build & Test) -- Docker Image --> I[Container Registry]
+        H("GitHub Actions - Build & Test") -- "Docker Image" --> I["Container Registry"]
     end
 
     subgraph "AWS Cloud"
-        J(EC2 Instance)
+        J["EC2 Instance"]
         subgraph "Services on EC2"
-            K[Spring Boot App (Docker)]
-            L[PostgreSQL Database]
-            M[Redis Cache/Pub-Sub]
+            K["Spring Boot App (Docker)"]
+            L["PostgreSQL Database"]
+            M["Redis Cache/Pub-Sub"]
         end
         J --- K
         J --- L
         J --- M
     end
 
-    A -- HTTP/HTTPS --> J
-    A -- WebSocket --> J
+    A -- "HTTP/HTTPS" --> J
+    A -- "WebSocket" --> J
     K --> L
     K --> M
-    J -- Pull Latest Image & Deploy (.sh script) --> I
+    J -- "Pull Latest Image & Deploy (.sh script)" --> I
 ```
 
 ## 📋 데이터베이스 스키마 (ERD)
 
-주요 엔티티 간의 관계는 다음과 같습니다. (PostgreSQL 기준)
+주요 엔티티 간의 관계는 다음과 같습니다.
 
 ```mermaid
 erDiagram
