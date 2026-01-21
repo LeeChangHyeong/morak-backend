@@ -129,14 +129,14 @@ erDiagram
 *   **게시물 (Posts)**: WYSIWYG 에디터를 지원하는 게시물 CRUD, 조회수, 좋아요 기능.
 *   **댓글 (Comments)**: 게시물에 대한 대댓글(Nested) 구조를 지원하는 댓글 CRUD.
 *   **실시간 채팅**: WebSocket(STOMP)을 활용한 1:1 및 그룹 채팅. Redis Pub/Sub을 통해 여러 서버 인스턴스 간 메시지 전송을 지원합니다.
-*   **신고 시스템**: 불適切な 사용자, 게시물, 댓글을 신고하는 기능.
+*   **신고 시스템**: 불량 사용자, 게시물, 댓글을 신고하는 기능.
 *   **최적화**: QueryDSL을 통한 동적 쿼리 및 복잡한 조회 성능 개선, 주요 데이터에 대한 인덱싱 적용.
 
 ## 🛠️ 기술 스택
 
 *   **Language**: `Java 17`
 *   **Framework**: `Spring Boot 3`, `Spring Security`, `Spring Data JPA`
-*   **Database**: `MySQL`, `Redis`
+*   **Database**: `PostgreSQL`, `Redis`
 *   **Query**: `QueryDSL`
 *   **Authentication**: `JWT (JSON Web Token)`
 *   **Real-time**: `WebSocket (STOMP)`
@@ -230,7 +230,5 @@ cd morak-backend
 
 ## 🗺️ 로드맵 (향후 개선 계획)
 
-*   **검색 엔진 도입**: `Elasticsearch`를 연동하여 전문(Full-text) 검색 기능 구현.
 *   **소셜 로그인**: OAuth2를 이용한 Google, Kakao 등 소셜 로그인 기능 추가.
-*   **알림 기능**: 친구 요청, 새 댓글, 채팅 메시지 등에 대한 실시간 알림 기능 고도화.
-*   **성능 모니터링**: `Prometheus`, `Grafana` 등을 도입하여 애플리케이션 성능 모니터링 환경 구축.
+*   **알림 기능**: 친구 요청, 새 댓글, 채팅 메시지 기능 추가등에 대한 실시간 알림 기능 고도화.
