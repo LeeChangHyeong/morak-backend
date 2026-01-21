@@ -16,37 +16,32 @@ graph TD
         A[Web/Mobile App]
     end
 
-    subgraph "Backend Server (Spring Boot)"
-        B(RESTful API)
-        C(WebSocket API)
-        D(Service Layer)
-        E(Repository Layer)
+    subgraph "CI/CD Pipeline"
+        H(GitHub Actions - Build & Test) -- Docker Image --> I[Container Registry]
     end
 
-    subgraph "Data Stores"
-        F[MySQL]
-        G[Redis]
-    end
-    
-    subgraph "Infrastructure"
-        H(GitHub Actions CI/CD)
-        I(Docker Container)
+    subgraph "AWS Cloud"
+        J(EC2 Instance)
+        subgraph "Services on EC2"
+            K[Spring Boot App (Docker)]
+            L[PostgreSQL Database]
+            M[Redis Cache/Pub-Sub]
+        end
+        J --- K
+        J --- L
+        J --- M
     end
 
-    A -- HTTP/HTTPS --> B
-    A -- WebSocket --> C
-    B --> D
-    C --> D
-    D --> E
-    E -- JPA/QueryDSL --> F
-    D -- Cache/Pub-Sub --> G
-    
-    H -- Builds & Tests --> I
+    A -- HTTP/HTTPS --> J
+    A -- WebSocket --> J
+    K --> L
+    K --> M
+    J -- Pull Latest Image & Deploy (.sh script) --> I
 ```
 
 ## 📋 데이터베이스 스키마 (ERD)
 
-주요 엔티티 간의 관계는 다음과 같습니다.
+주요 엔티티 간의 관계는 다음과 같습니다. (PostgreSQL 기준)
 
 ```mermaid
 erDiagram
@@ -130,7 +125,7 @@ erDiagram
 *   **댓글 (Comments)**: 게시물에 대한 대댓글(Nested) 구조를 지원하는 댓글 CRUD.
 *   **실시간 채팅**: WebSocket(STOMP)을 활용한 1:1 및 그룹 채팅. Redis Pub/Sub을 통해 여러 서버 인스턴스 간 메시지 전송을 지원합니다.
 *   **신고 시스템**: 불량 사용자, 게시물, 댓글을 신고하는 기능.
-*   **최적화**: QueryDSL을 통한 동적 쿼리 및 복잡한 조회 성능 개선, 주요 데이터에 대한 인덱싱 적용. 게시글, 댓글 페이지네이션 적용.
+*   **최적화**: QueryDSL을 통한 동적 쿼리 및 복잡한 조회 성능 개선, 주요 데이터에 대한 인덱싱 적용.
 
 ## 🛠️ 기술 스택
 
@@ -195,23 +190,20 @@ erDiagram
 }
 ```
 
-## 🧪 테스트 전략
-
-코드의 안정성과 신뢰성을 보장하기 위해 다양한 테스트를 작성합니다.
-*   **Unit Tests**: `JUnit 5`와 `Mockito`를 사용하여 각 서비스 로직과 컴포넌트의 동작을 고립된 환경에서 검증합니다.
-*   **Integration Tests**: `@SpringBootTest`를 활용하여 실제 데이터베이스 및 외부 의존성과의 통합을 테스트하고, API 엔드포인트가 의도대로 작동하는지 확인합니다.
-
 ## 🔄 CI/CD 및 배포
 
-*   **CI (Continuous Integration)**: `GitHub Actions`를 통해 main 브랜치에 코드가 푸시될 때마다 Gradle 빌드 및 테스트를 자동화하여 코드 품질을 유지합니다.
-*   **CD (Continuous Deployment)**: CI가 성공적으로 완료되면 `Dockerfile`을 사용하여 프로젝트를 컨테이너 이미지로 빌드합니다. 이 이미지는 Docker Hub에 푸시되거나 클라우드 환경(예: AWS, GCP)에 배포될 수 있습니다.
+    이 프로젝트는 `GitHub Actions`를 활용한 CI/CD 파이프라인을 구축하여 개발 생산성과 배포의 안정성을 높였습니다.
+
+1.  **CI (Continuous Integration)**: `main` 브랜치로 푸시될 때마다 `GitHub Actions`가 자동으로 트리거되어 코드를 빌드하고 모든 테스트를 실행하여 코드 변경 사항의 통합을 검증합니다.
+2.  **Docker 이미지 빌드**: 빌드 및 테스트가 성공하면, `Dockerfile`을 기반으로 애플리케이션의 Docker 이미지를 빌드하고 이를 `Container Registry` (예: Docker Hub 또는 GitHub Container Registry)에 푸시합니다.
+3.  **CD (Continuous Deployment on EC2)**: EC2 인스턴스에 배포를 자동화하기 위한 셸 스크립트(`.sh`)가 준비되어 있습니다. 이 스크립트는 EC2 인스턴스에서 실행되어 `Container Registry`에서 최신 Docker 이미지를 풀(pull)하고, 기존 컨테이너를 안전하게 중단한 후 새로운 버전의 애플리케이션을 배포합니다. 이 과정을 통해 빠르고 효율적인 배포 업데이트를 가능하게 합니다.
 
 ## 🚀 시작하기
 
 ### 1. 전제 조건
 *   Java 17
 *   Gradle 8.1.1+
-*   MySQL & Redis
+*   PostgreSQL & Redis
 
 ### 2. 프로젝트 실행
 ```bash
@@ -223,7 +215,20 @@ cd morak-backend
 # src/main/resources/application.properties.example 파일을 복사하여
 # application.properties 파일을 생성하고 환경에 맞게 수정합니다.
 
+# PostgreSQL 설정 예시
+# spring.datasource.url=jdbc:postgresql://localhost:5432/morak
+# spring.datasource.username=your-db-username
+# spring.datasource.password=your-db-password
+
+# Redis 설정 예시
+# spring.data.redis.host=localhost
+# spring.data.redis.port=6379
+
+# JWT 설정 예시
+# jwt.secret.key=your-super-secret-key-that-is-long-enough
+
 # 3. 빌드 및 실행
 ./gradlew bootRun
 ```
 애플리케이션 실행 후, `http://localhost:8080/swagger-ui/index.html`에서 API 문서를 확인할 수 있습니다.
+
